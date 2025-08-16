@@ -1,0 +1,150 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --c0: #ff7101;
+    --c1: #d35b00;
+    --c2: #030811;
+    --c3: #102e4a;
+    --c4: #f8fbfe;
+    --c5: #ffffff;
+    --c6: #d1d5db;
+    --c7: #000000;
+    --c8: #111111;
+    --c9: #20bf6b;
+    --c10: #f7b731;
+    --c11: #21bf6b;
+    --font-family-primary: "Rubik";
+    --font-size-base: 16px;
+    --line-height-base: 1.6;
+    --border-radius-base: 15px;
+    --border-radius-small: 5px;
+    --border-radius-large: 25px;
+    --container-max-width: 1240px;
+}
+
+body {
+    font-family: var(--font-family-primary), sans-serif;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: #333;
+    background: #fff;
+    overflow-x: hidden;
+}
+
+/* Global Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.animate-on-scroll.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Utility Classes */
+.container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.col {
+    flex: 1 1 calc(33.333% - 20px);
+    display: flex;
+}
+
+@media (max-width: 768px) {
+    .col {
+        flex: 1 1 100%;
+    }
+}
+
+/* Form Styles */
+input,
+textarea,
+select {
+    font-family: inherit;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* Admin Panel Global Styles */
+.admin-panel {
+    --admin-sidebar-width: 250px;
+    --admin-header-height: 70px;
+}
+
+/* Responsive Images */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Focus States */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+    outline: 2px solid var(--c0);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .admin-sidebar,
+    .admin-header {
+        display: none !important;
+    }
+
+    .admin-main {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
