@@ -3,13 +3,13 @@
         <div class="login-container">
             <div class="login-card">
                 <div class="login-header">
-                    <img
+                    <!-- <img
                         :src="settings.logo"
                         :alt="settings.site_name"
                         class="login-logo"
-                    />
+                    /> -->
                     <h2>Admin Login</h2>
-                    <p>Access the {{ settings.site_name }} admin panel</p>
+                    <p>Access the {{ settings?.site_name || "" }} admin panel</p>
                 </div>
 
                 <form @submit.prevent="handleLogin" class="login-form">
@@ -69,7 +69,7 @@ export default {
         const error = ref("");
 
         const loading = computed(() => store.state.auth.loading);
-        const settings = computed(() => store.state.site.settings);
+        // const settings = computed(() => store.state.site.settings);
         const isAuthenticated = computed(
             () => store.getters["auth/isAuthenticated"]
         );
@@ -91,16 +91,12 @@ export default {
             if (isAuthenticated.value) {
                 router.push("/admin");
             }
-
-            // Load site settings
-            store.dispatch("site/loadSettings");
         });
 
         return {
             form,
             error,
             loading,
-            settings,
             handleLogin,
         };
     },

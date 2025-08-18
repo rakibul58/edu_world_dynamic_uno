@@ -20,15 +20,11 @@ import Admin from './views/Admin.vue'
 import Login from './views/Login.vue'
 
 // Store modules
-import siteModule from './store/modules/site'
-import adminModule from './store/modules/admin'
 import authModule from './store/modules/auth'
 
 // Create Vuex store
 const store = createStore({
     modules: {
-        site: siteModule,
-        admin: adminModule,
         auth: authModule
     }
 })
