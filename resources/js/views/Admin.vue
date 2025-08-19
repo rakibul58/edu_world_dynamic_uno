@@ -71,11 +71,42 @@
                                     v-if="item.icon === 'dashboard'"
                                     d="M3 3h7v9H3V3zm11 0h7v5h-7V3zm0 9h7v9h-7v-9zM3 16h7v5H3v-5z"
                                 />
-                                <g v-else-if="item.icon === 'users'">
-                                    <path
-                                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                                <g v-else-if="item.icon === 'page-sections'">
+                                    <!-- Top section -->
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="4"
+                                        rx="1"
                                     />
-                                    <circle cx="12" cy="7" r="4" />
+                                    <line x1="6" y1="5" x2="10" y2="5" />
+
+                                    <!-- Middle section with divider -->
+                                    <rect
+                                        x="3"
+                                        y="9"
+                                        width="18"
+                                        height="6"
+                                        rx="1"
+                                    />
+                                    <line x1="3" y1="12" x2="21" y2="12" />
+                                    <line x1="6" y1="10.5" x2="10" y2="10.5" />
+                                    <line x1="6" y1="13.5" x2="14" y2="13.5" />
+
+                                    <!-- Bottom section -->
+                                    <rect
+                                        x="3"
+                                        y="17"
+                                        width="18"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="6" y1="19" x2="12" y2="19" />
+
+                                    <!-- Management dots -->
+                                    <circle cx="18" cy="5" r="1" />
+                                    <circle cx="18" cy="19" r="1" />
                                 </g>
                                 <g v-else-if="item.icon === 'products'">
                                     <path
