@@ -37,7 +37,19 @@ const routes = [
         name: "Admin",
         component: Admin,
         meta: { requiresAuth: true },
-        children: [{ path: '', name: 'Dashboard', component: () => import('./components/admin/Dashboard.vue') }],
+        children: [
+            {
+                path: "dashboard",
+                name: "Dashboard",
+                component: () => import("./components/admin/Dashboard.vue"),
+            },
+            {
+                path: "sections-management",
+                name: "SectionsManagement",
+                component: () =>
+                    import("./components/admin/SectionManager.vue"),
+            },
+        ],
     },
     { path: "/login", name: "Login", component: Login },
 ];

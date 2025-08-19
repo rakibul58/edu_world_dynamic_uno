@@ -68,6 +68,10 @@ class PageSectionController extends Controller
             'is_visible' => !$section->is_visible
         ]);
 
+        if ($section->section_key === 'hero_section' && $section->is_visible === false) {
+            PageSection::where('section_key', 'programs_section')->update(['is_visible' => false]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Section visibility toggled',

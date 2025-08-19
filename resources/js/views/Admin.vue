@@ -291,14 +291,14 @@ export default {
             {
                 name: "dashboard",
                 label: "Dashboard",
-                path: "/admin",
+                path: "/admin/dashboard",
                 icon: "dashboard",
             },
             {
-                name: "users",
-                label: "Users",
-                path: "/admin/users",
-                icon: "users",
+                name: "pageSections",
+                label: "Sections Management",
+                path: "/admin/sections-management",
+                icon: "page-sections",
             },
             {
                 name: "products",

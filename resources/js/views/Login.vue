@@ -217,7 +217,7 @@ export default {
             const result = await store.dispatch("auth/login", form.value);
 
             if (result.success) {
-                router.push("/admin");
+                router.push("/admin/dashboard");
             } else {
                 error.value = result.message;
             }
