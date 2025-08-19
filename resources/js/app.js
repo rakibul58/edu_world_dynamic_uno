@@ -1,103 +1,109 @@
-import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import { createStore } from 'vuex'
-import axios from 'axios'
-import App from './App.vue'
+import { createApp } from "vue";
+import { createRouter, createWebHistory } from "vue-router";
+import { createStore } from "vuex";
+import axios from "axios";
+import App from "./App.vue";
 
 // Configure axios
-axios.defaults.baseURL = '/api'
-axios.defaults.withCredentials = true
+axios.defaults.baseURL = "/api";
+axios.defaults.withCredentials = true;
 
 // Get CSRF token
-const token = document.head.querySelector('meta[name="csrf-token"]')
+const token = document.head.querySelector('meta[name="csrf-token"]');
 if (token) {
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content
+    axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
 }
 
 // Import components
-import Home from './views/Home.vue'
-import Admin from './views/Admin.vue'
-import Login from './views/Login.vue'
+import Home from "./views/Home.vue";
+import Admin from "./views/Admin.vue";
+import Login from "./views/Login.vue";
 
 // Store modules
-import authModule from './store/modules/auth'
+import authModule from "./store/modules/auth";
 
 // Create Vuex store
 const store = createStore({
     modules: {
-        auth: authModule
-    }
-})
+        auth: authModule,
+    },
+});
 
 // Create router
 const routes = [
-    { path: '/', name: 'Home', component: Home },
-    { path: '/admin', name: 'Admin', component: Admin, meta: { requiresAuth: true } },
-    { path: '/login', name: 'Login', component: Login },
-]
+    { path: "/", name: "Home", component: Home },
+    {
+        path: "/admin",
+        name: "Admin",
+        component: Admin,
+        meta: { requiresAuth: true },
+        children: [{ path: '', name: 'Dashboard', component: () => import('./components/admin/Dashboard.vue') }],
+    },
+    { path: "/login", name: "Login", component: Login },
+];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
     scrollBehavior(to, from, savedPosition) {
         if (savedPosition) {
-            return savedPosition
+            return savedPosition;
         } else {
-            return { top: 0 }
+            return { top: 0 };
         }
-    }
-})
+    },
+});
 
 // Navigation guard
 router.beforeEach(async (to, from, next) => {
-    const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-    const token = localStorage.getItem('auth_token')
-    
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+    const token = localStorage.getItem("auth_token");
+
     if (requiresAuth) {
         if (token) {
             try {
-                await store.dispatch('auth/getUser')
-                next()
+                await store.dispatch("auth/getUser");
+                next();
             } catch (error) {
-                store.dispatch('auth/logout')
-                next('/login')
+                store.dispatch("auth/logout");
+                next("/login");
             }
         } else {
-            next('/login')
+            next("/login");
         }
     } else {
-        next()
+        next();
     }
-})
+});
 
 // Create and mount app
-const app = createApp(App)
-app.use(store)
-app.use(router)
+const app = createApp(App);
+app.use(store);
+app.use(router);
 
 // Global axios interceptor
 axios.interceptors.request.use(
-    config => {
-        const token = localStorage.getItem('auth_token')
+    (config) => {
+        const token = localStorage.getItem("auth_token");
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`
+            config.headers.Authorization = `Bearer ${token}`;
         }
-        return config
+        return config;
     },
-    error => {
-        return Promise.reject(error)
+    (error) => {
+        return Promise.reject(error);
     }
-)
+);
 
 axios.interceptors.response.use(
-    response => response,
-    error => {
+    (response) => response,
+    (error) => {
         if (error.response?.status === 401) {
-            store.dispatch('auth/logout')
-            router.push('/login')
+            store.dispatch("auth/logout");
+            router.push("/login");
         }
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
-)
+);
 
-app.mount('#app')
+app.mount("#app");

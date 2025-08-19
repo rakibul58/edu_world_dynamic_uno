@@ -1,3 +1,18 @@
 * {
   font-family: "Rubik", sans-serif;
 }
+
+:root {
+  --c0: #ff7101;
+  --c1: #d35b00;
+  --c2: #030811;
+  --c3: #102e4a;
+  --c4: #f8fbfe;
+  --c5: #ffffff;
+  --c6: #d1d5db;
+  --c7: #000000;
+  --c8: #111111;
+  --c9: #20bf6b;
+  --c10: #f7b731;
+  --c11: #21bf6b;
+}
