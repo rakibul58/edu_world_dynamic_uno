@@ -49,6 +49,11 @@ const routes = [
                 component: () =>
                     import("./components/admin/SectionManager.vue"),
             },
+            {
+                path: "manage-header-section",
+                name: "HeaderSection",
+                component: () => import("./components/admin/HeaderSectionManagement.vue"),
+            }
         ],
     },
     { path: "/login", name: "Login", component: Login },

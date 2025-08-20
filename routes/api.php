@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageSectionController;
+use App\Http\Controllers\HeaderSectionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('page-sections/update-order', [PageSectionController::class, 'updateOrder']);
         Route::patch('page-sections/bulk-toggle', [PageSectionController::class, 'bulkToggle']);
     });
+    Route::apiResource('header-sections', HeaderSectionController::class);
 });
 
 // Public route for frontend
 Route::get('page-sections/visible', [PageSectionController::class, 'getVisibleSections']);
+Route::get('header-sections', [HeaderSectionController::class, 'index']);
