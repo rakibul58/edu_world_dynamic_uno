@@ -23,10 +23,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('page-sections/{section}/toggle', [PageSectionController::class, 'toggleVisibility']);
         Route::patch('page-sections/update-order', [PageSectionController::class, 'updateOrder']);
         Route::patch('page-sections/bulk-toggle', [PageSectionController::class, 'bulkToggle']);
+        Route::get('header-sections', [HeaderSectionController::class, 'index']);
+        Route::post('header-sections', [HeaderSectionController::class, 'store']);
+        Route::get('header-sections/{id}', [HeaderSectionController::class, 'show']);
+        Route::put('header-sections/{id}', [HeaderSectionController::class, 'update']);
+        Route::delete('header-sections/{id}', [HeaderSectionController::class, 'destroy']);
+        Route::patch('header-sections/{id}/toggle', [HeaderSectionController::class, 'toggleActive']);
+        Route::patch('header-sections/update-order', [HeaderSectionController::class, 'updateOrder']);
+        Route::patch('header-sections/bulk-toggle', [HeaderSectionController::class, 'bulkToggle']);
     });
-    Route::apiResource('header-sections', HeaderSectionController::class);
 });
 
 // Public route for frontend
 Route::get('page-sections/visible', [PageSectionController::class, 'getVisibleSections']);
-Route::get('header-sections', [HeaderSectionController::class, 'index']);
+Route::get('/header-sections/active', [HeaderSectionController::class, 'getActive']);

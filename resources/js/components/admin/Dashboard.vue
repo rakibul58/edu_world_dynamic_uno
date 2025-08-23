@@ -90,15 +90,30 @@
                                 <circle cx="18" cy="5" r="1" />
                                 <circle cx="18" cy="19" r="1" />
                             </g>
-                            <!-- Add Product Icon -->
-                            <g v-else-if="action.icon === 'package-plus'">
-                                <path
-                                    d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"
+                            <g v-else-if="action.icon === 'header-section'">
+                                <!-- Outer page rectangle -->
+                                <rect
+                                    x="3"
+                                    y="4"
+                                    width="18"
+                                    height="16"
+                                    rx="2"
+                                    ry="2"
                                 />
-                                <line x1="3" y1="6" x2="21" y2="6" />
-                                <path d="M16 10a4 4 0 0 1-8 0" />
-                                <line x1="12" y1="8" x2="12" y2="12" />
-                                <line x1="10" y1="10" x2="14" y2="10" />
+
+                                <!-- Header bar -->
+                                <rect
+                                    x="3"
+                                    y="4"
+                                    width="18"
+                                    height="4"
+                                    rx="1"
+                                    ry="1"
+                                />
+
+                                <!-- Header text lines -->
+                                <line x1="6" y1="6" x2="10" y2="6" />
+                                <line x1="12" y1="6" x2="16" y2="6" />
                             </g>
                             <!-- View Orders Icon -->
                             <g v-else-if="action.icon === 'clipboard-list'">
@@ -330,13 +345,13 @@ export default {
                 disabled: false,
             },
             {
-                name: "add-product",
-                title: "Add Product",
+                name: "headerSection",
+                title: "Manage Header",
                 description: "Add new product to catalog",
-                icon: "package-plus",
+                icon: "header-section",
                 color: "#ff7101",
                 action: "navigate",
-                target: "/admin/products/create",
+                target: "/admin/manage-header-section",
                 disabled: false,
             },
             {

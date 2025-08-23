@@ -10,32 +10,38 @@ class HeaderSection extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'logo_type',
-        'logo_image_path',
         'logo_text',
-        'logo_text_style',
-        'logo_styles',
-        'logo_link',
-        'logo_responsive',
+        'logo_image_path',
         'logo_tagline',
-        'tagline_styles',
+        'logo_link',
         'buttons',
+        'logo_styles',
+        'tagline_styles',
         'nav_styles',
-        'is_active'
+        'advanced_settings',
+        'is_active',
+        'sort_order'
     ];
 
     protected $casts = [
-        'logo_text_style' => 'array',
-        'logo_styles' => 'array',
         'logo_link' => 'array',
-        'logo_responsive' => 'array',
-        'tagline_styles' => 'array',
         'buttons' => 'array',
-        'nav_styles' => 'array'
+        'logo_styles' => 'array',
+        'tagline_styles' => 'array',
+        'nav_styles' => 'array',
+        'advanced_settings' => 'array',
+        'is_active' => 'boolean',
     ];
 
-    public static function getActiveHeader()
+    public function scopeActive($query)
     {
-        return self::where('is_active', true)->first();
+        return $query->where('is_active', true);
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('sort_order');
     }
 }
