@@ -141,6 +141,7 @@
                         <div class="input-group">
                             <input
                                 v-model="formData.logo_link.url"
+                                style="width:200px"
                                 type="text"
                                 class="form-input"
                                 placeholder="https://example.com or /"
