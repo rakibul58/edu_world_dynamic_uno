@@ -1,9 +1,10 @@
 <template>
     <nav
+        ref="navbar"
         class="navbar-top"
         :style="navStyles"
         :class="{
-            'sticky-header': headerData?.advanced_settings?.stickyHeader,
+            'sticky-header': headerData?.advanced_settings?.stickyHeader && isSticky,
             'hide-mobile': headerData?.advanced_settings?.hideOnMobile,
             animated: headerData?.advanced_settings?.enableAnimations,
         }"
@@ -68,6 +69,7 @@ export default {
             headerData: null,
             loading: false,
             isSticky: false,
+            navbarHeight: 0,
         };
     },
     computed: {
@@ -116,6 +118,7 @@ export default {
     async mounted() {
         await this.fetchHeader();
         this.setupStickyHeader();
+        this.calculateNavbarHeight();
     },
     methods: {
         async fetchHeader() {
@@ -135,11 +138,41 @@ export default {
         setupStickyHeader() {
             if (this.headerData?.advanced_settings?.stickyHeader) {
                 window.addEventListener("scroll", this.handleScroll);
+                window.addEventListener("resize", this.calculateNavbarHeight);
             }
         },
 
+        calculateNavbarHeight() {
+            this.$nextTick(() => {
+                if (this.$refs.navbar) {
+                    this.navbarHeight = this.$refs.navbar.offsetHeight;
+                    this.updateBodyPadding();
+                }
+            });
+        },
+
         handleScroll() {
-            this.isSticky = window.scrollY > 100;
+            const shouldBeSticky = window.scrollY > 100;
+            
+            if (shouldBeSticky !== this.isSticky) {
+                this.isSticky = shouldBeSticky;
+                this.updateBodyPadding();
+            }
+        },
+
+        updateBodyPadding() {
+            // Method 1: Add padding to body when sticky
+            if (this.isSticky && this.headerData?.advanced_settings?.stickyHeader) {
+                document.body.style.paddingTop = `${this.navbarHeight}px`;
+            } else {
+                document.body.style.paddingTop = '0px';
+            }
+
+            // Alternative Method 2: Emit event for parent component to handle
+            this.$emit('sticky-change', {
+                isSticky: this.isSticky,
+                height: this.navbarHeight
+            });
         },
 
         getButtonStyles(button) {
@@ -268,8 +301,22 @@ export default {
     beforeUnmount() {
         if (this.headerData?.advanced_settings?.stickyHeader) {
             window.removeEventListener("scroll", this.handleScroll);
+            window.removeEventListener("resize", this.calculateNavbarHeight);
+            // Clean up body padding
+            document.body.style.paddingTop = '0px';
         }
     },
+
+    watch: {
+        headerData: {
+            handler() {
+                this.$nextTick(() => {
+                    this.calculateNavbarHeight();
+                });
+            },
+            deep: true
+        }
+    }
 };
 </script>
 
@@ -287,6 +334,8 @@ export default {
     left: 0;
     right: 0;
     z-index: 1000;
+    /* Add a subtle shadow when sticky */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-top.animated {
