@@ -179,7 +179,6 @@ class HeaderSectionController extends Controller
                 'nav_styles' => 'nullable',
                 'advanced_settings' => 'nullable',
                 'logo_link' => 'nullable',
-                'is_active' => 'nullable|boolean',
                 'sort_order' => 'nullable|integer'
             ]);
 
@@ -192,9 +191,11 @@ class HeaderSectionController extends Controller
                 ], 422);
             }
 
+            
             // Start with existing data
             $updateData = [];
-
+            $updateData['is_active'] = $request['is_active'] == "true" ? true : false;
+            
             // Handle simple fields
             $simpleFields = ['name', 'logo_type', 'logo_text', 'logo_tagline', 'is_active', 'sort_order'];
             foreach ($simpleFields as $field) {

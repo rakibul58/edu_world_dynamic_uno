@@ -457,14 +457,25 @@ export default {
                 let response;
 
                 if (this.isEditing) {
+                    // For updates with file uploads, use POST with method spoofing
                     response = await axios.post(
                         `/admin/header-sections/${this.currentHeader.id}`,
-                        formData
+                        formData,
+                        {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                        }
                     );
                 } else {
                     response = await axios.post(
                         "/admin/header-sections",
-                        formData
+                        formData,
+                        {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                        }
                     );
                 }
 
@@ -479,10 +490,21 @@ export default {
                     this.fetchHeaders();
                 }
             } catch (error) {
-                this.showMessage(
-                    `Failed to ${this.isEditing ? "update" : "create"} header`,
-                    "error"
-                );
+                console.error("Save error:", error);
+                let errorMessage = `Failed to ${
+                    this.isEditing ? "update" : "create"
+                } header`;
+
+                if (error.response?.data?.message) {
+                    errorMessage += `: ${error.response.data.message}`;
+                } else if (error.response?.data?.errors) {
+                    const errors = Object.values(
+                        error.response.data.errors
+                    ).flat();
+                    errorMessage += `: ${errors.join(", ")}`;
+                }
+
+                this.showMessage(errorMessage, "error");
                 console.error("Error saving header:", error);
             } finally {
                 this.loading = false;

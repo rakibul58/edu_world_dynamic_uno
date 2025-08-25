@@ -26,7 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('header-sections', [HeaderSectionController::class, 'index']);
         Route::post('header-sections', [HeaderSectionController::class, 'store']);
         Route::get('header-sections/{id}', [HeaderSectionController::class, 'show']);
-        Route::post('header-sections/{id}', [HeaderSectionController::class, 'update']);
+        Route::post('/header-sections/{id}', [HeaderSectionController::class, 'update']);
         Route::delete('header-sections/{id}', [HeaderSectionController::class, 'destroy']);
         Route::patch('header-sections/{id}/toggle', [HeaderSectionController::class, 'toggleActive']);
         Route::patch('header-sections/update-order', [HeaderSectionController::class, 'updateOrder']);

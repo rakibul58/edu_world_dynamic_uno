@@ -153,6 +153,10 @@
                                 <option value="_blank">New Window</option>
                             </select>
                         </div>
+                        <small class="form-help"
+                            >Current link:
+                            {{ formData.logo_link.url || "Not set" }}</small
+                        >
                     </div>
                 </div>
 
@@ -245,32 +249,29 @@
                                             v-model="button.style"
                                             class="form-select"
                                         >
-                                            <option value="primary">
-                                                Primary
-                                            </option>
-                                            <option value="secondary">
-                                                Secondary
-                                            </option>
-                                            <option value="outlined">
-                                                Outlined
-                                            </option>
-                                            <option value="ghost">Ghost</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label"
-                                            >Button Type</label
-                                        >
-                                        <select
-                                            v-model="button.type"
-                                            class="form-select"
-                                        >
                                             <option value="filled">
                                                 Filled
                                             </option>
                                             <option value="outlined">
                                                 Outlined
                                             </option>
+                                            <option value="ghost">Ghost</option>
+                                            <option value="transparent">
+                                                Transparent
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"
+                                            >Button Size</label
+                                        >
+                                        <select
+                                            v-model="button.size"
+                                            class="form-select"
+                                        >
+                                            <option value="sm">Small</option>
+                                            <option value="md">Medium</option>
+                                            <option value="lg">Large</option>
                                         </select>
                                     </div>
                                 </div>
@@ -289,7 +290,7 @@
 
                                 <!-- Custom Styles -->
                                 <details class="custom-styles-toggle">
-                                    <summary>Custom Colors</summary>
+                                    <summary>Custom Colors & Styles</summary>
                                     <div class="custom-styles-content">
                                         <div class="color-row">
                                             <div class="color-group">
@@ -402,7 +403,7 @@
                                                         "
                                                         type="text"
                                                         class="form-input"
-                                                        placeholder="#e06500"
+                                                        placeholder="transparent"
                                                     />
                                                 </div>
                                             </div>
@@ -429,6 +430,49 @@
                                                         placeholder="#ffffff"
                                                     />
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div class="color-row">
+                                            <div class="color-group">
+                                                <label class="form-label"
+                                                    >Hover Border</label
+                                                >
+                                                <div class="color-input-group">
+                                                    <input
+                                                        v-model="
+                                                            button.custom_styles
+                                                                .hover_border_color
+                                                        "
+                                                        type="color"
+                                                        class="color-input"
+                                                    />
+                                                    <input
+                                                        v-model="
+                                                            button.custom_styles
+                                                                .hover_border_color
+                                                        "
+                                                        type="text"
+                                                        class="form-input"
+                                                        placeholder="#ff7101"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="color-group">
+                                                <label class="form-label"
+                                                    >Button Opacity</label
+                                                >
+                                                <input
+                                                    v-model="
+                                                        button.custom_styles
+                                                            .opacity
+                                                    "
+                                                    type="number"
+                                                    min="0"
+                                                    max="1"
+                                                    step="0.1"
+                                                    class="form-input"
+                                                    placeholder="1"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -746,47 +790,61 @@
                         >
                             <div class="preview-content">
                                 <div class="preview-logo">
-                                    <img
-                                        v-if="
-                                            formData.logo_type === 'image' &&
-                                            (logoPreview ||
-                                                formData.logo_image_path)
-                                        "
-                                        :src="
-                                            logoPreview ||
-                                            formData.logo_image_path
-                                        "
-                                        alt="Logo"
-                                        :style="getPreviewLogoImageStyles()"
-                                    />
-                                    <div
-                                        v-else
-                                        class="preview-text-logo"
-                                        :style="getPreviewLogoTextStyles()"
-                                    >
-                                        <span>{{
-                                            formData.logo_text || "Your Brand"
-                                        }}</span>
-                                        <small
-                                            v-if="formData.logo_tagline"
-                                            :style="getPreviewTaglineStyles()"
+                                    <a href="#" class="preview-logo-link">
+                                        <img
+                                            v-if="
+                                                formData.logo_type ===
+                                                    'image' &&
+                                                (logoPreview ||
+                                                    formData.logo_image_path)
+                                            "
+                                            :src="
+                                                logoPreview ||
+                                                formData.logo_image_path
+                                            "
+                                            alt="Logo"
+                                            :style="getPreviewLogoImageStyles()"
+                                        />
+                                        <div
+                                            v-else
+                                            class="preview-text-logo"
+                                            :style="getPreviewLogoTextStyles()"
                                         >
-                                            {{ formData.logo_tagline }}
-                                        </small>
+                                            <span>{{
+                                                formData.logo_text ||
+                                                "Your Brand"
+                                            }}</span>
+                                            <small
+                                                v-if="formData.logo_tagline"
+                                                :style="
+                                                    getPreviewTaglineStyles()
+                                                "
+                                            >
+                                                {{ formData.logo_tagline }}
+                                            </small>
+                                        </div>
+                                    </a>
+                                    <div class="logo-link-info">
+                                        <small
+                                            >Links to:
+                                            {{
+                                                formData.logo_link.url || "/"
+                                            }}</small
+                                        >
                                     </div>
                                 </div>
                                 <div class="preview-buttons">
-                                    <button
+                                    <a
                                         v-for="(
                                             button, index
                                         ) in formData.buttons"
                                         :key="index"
-                                        type="button"
+                                        href="#"
                                         class="preview-btn"
                                         :style="getButtonPreviewStyle(button)"
                                     >
                                         {{ button.text || "Button" }}
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -852,8 +910,8 @@ export default {
                     {
                         text: "Get Started",
                         url: "/get-started",
-                        style: "primary",
-                        type: "filled",
+                        style: "filled",
+                        size: "md",
                         custom_styles: {
                             background_color: "#ff7101",
                             text_color: "#ffffff",
@@ -861,6 +919,8 @@ export default {
                             border_radius: "5px",
                             hover_background_color: "#e06500",
                             hover_text_color: "#ffffff",
+                            hover_border_color: "#e06500",
+                            opacity: "1",
                         },
                     },
                 ],
@@ -942,6 +1002,32 @@ export default {
                             target: "_self",
                         };
                     }
+
+                    // Ensure buttons have all required fields
+                    if (
+                        this.formData.buttons &&
+                        Array.isArray(this.formData.buttons)
+                    ) {
+                        this.formData.buttons = this.formData.buttons.map(
+                            (button) => ({
+                                text: button.text || "Button",
+                                url: button.url || "#",
+                                style: button.style || "filled",
+                                size: button.size || "md",
+                                custom_styles: {
+                                    background_color: "#ff7101",
+                                    text_color: "#ffffff",
+                                    border_color: "#ff7101",
+                                    border_radius: "5px",
+                                    hover_background_color: "#e06500",
+                                    hover_text_color: "#ffffff",
+                                    hover_border_color: "#e06500",
+                                    opacity: "1",
+                                    ...button.custom_styles,
+                                },
+                            })
+                        );
+                    }
                 }
             },
             immediate: true,
@@ -967,6 +1053,11 @@ export default {
             // Add logo file if uploaded
             if (this.logoFile) {
                 formData.append("logo_image", this.logoFile);
+            }
+
+            // IMPORTANT FIX: Add _method parameter for Laravel to handle PUT/PATCH requests with files
+            if (this.isEditing) {
+                formData.append("_method", "POST"); // Use POST method spoofing for updates with files
             }
 
             this.$emit("save", formData);
@@ -1012,8 +1103,8 @@ export default {
             this.formData.buttons.push({
                 text: "New Button",
                 url: "#",
-                style: "primary",
-                type: "filled",
+                style: "filled",
+                size: "md",
                 custom_styles: {
                     background_color: "#ff7101",
                     text_color: "#ffffff",
@@ -1021,6 +1112,8 @@ export default {
                     border_radius: "5px",
                     hover_background_color: "#e06500",
                     hover_text_color: "#ffffff",
+                    hover_border_color: "#e06500",
+                    opacity: "1",
                 },
             });
         },
@@ -1031,42 +1124,81 @@ export default {
 
         getButtonPreviewStyle(button) {
             const custom = button.custom_styles || {};
-            const style = {
-                backgroundColor:
-                    custom.background_color ||
-                    this.getDefaultButtonColor(button.style),
-                color: custom.text_color || "#ffffff",
-                border: `2px solid ${
-                    custom.border_color ||
-                    custom.background_color ||
-                    this.getDefaultButtonColor(button.style)
-                }`,
+            const size = this.getButtonSize(button.size || "md");
+
+            let style = {
+                ...size,
                 borderRadius: custom.border_radius || "5px",
-                padding: "8px 16px",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
+                opacity: custom.opacity || "1",
+                textDecoration: "none",
+                display: "inline-block",
+                fontWeight: "500",
             };
 
-            if (button.style === "outlined") {
-                style.backgroundColor = "transparent";
-                style.color =
-                    custom.text_color ||
-                    custom.border_color ||
-                    this.getDefaultButtonColor(button.style);
-            } else if (button.style === "ghost") {
-                style.backgroundColor = "transparent";
-                style.border = "none";
+            // Apply different styles based on button type
+            switch (button.style) {
+                case "filled":
+                    style.backgroundColor =
+                        custom.background_color || "#ff7101";
+                    style.color = custom.text_color || "#ffffff";
+                    style.border = `2px solid ${
+                        custom.border_color ||
+                        custom.background_color ||
+                        "#ff7101"
+                    }`;
+                    break;
+                case "outlined":
+                    style.backgroundColor = "transparent";
+                    style.color =
+                        custom.text_color || custom.border_color || "#ff7101";
+                    style.border = `2px solid ${
+                        custom.border_color || "#ff7101"
+                    }`;
+                    break;
+                case "ghost":
+                    style.backgroundColor = "transparent";
+                    style.color = custom.text_color || "#ffffff";
+                    style.border = "2px solid transparent";
+                    break;
+                case "transparent":
+                    style.backgroundColor =
+                        custom.background_color || "transparent";
+                    style.color = custom.text_color || "#ffffff";
+                    style.border = custom.border_color
+                        ? `2px solid ${custom.border_color}`
+                        : "2px solid transparent";
+                    break;
+                default:
+                    style.backgroundColor =
+                        custom.background_color || "#ff7101";
+                    style.color = custom.text_color || "#ffffff";
+                    style.border = `2px solid ${
+                        custom.border_color ||
+                        custom.background_color ||
+                        "#ff7101"
+                    }`;
             }
 
             return style;
         },
 
+        getButtonSize(size) {
+            const sizes = {
+                sm: { padding: "6px 12px", fontSize: "0.875rem" },
+                md: { padding: "8px 16px", fontSize: "0.95rem" },
+                lg: { padding: "10px 20px", fontSize: "1.1rem" },
+            };
+            return sizes[size] || sizes.md;
+        },
+
         getDefaultButtonColor(style) {
             const colors = {
-                primary: "#ff7101",
-                secondary: "#20bf6b",
+                filled: "#ff7101",
                 outlined: "#ff7101",
                 ghost: "#ffffff",
+                transparent: "transparent",
             };
             return colors[style] || "#ff7101";
         },
@@ -1610,14 +1742,32 @@ input:checked + .toggle-slider:before {
 
 .preview-logo {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.preview-logo-link {
+    display: flex;
     align-items: center;
     gap: 12px;
+    text-decoration: none;
+    color: inherit;
 }
 
 .preview-text-logo {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.logo-link-info {
+    margin-top: 4px;
+}
+
+.logo-link-info small {
+    color: #9ca3af;
+    font-size: 0.75rem;
 }
 
 .preview-buttons {
@@ -1627,12 +1777,17 @@ input:checked + .toggle-slider:before {
 }
 
 .preview-btn {
-    padding: 10px 20px;
     border: none;
     border-radius: 6px;
     font-weight: 500;
     cursor: pointer;
     text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.preview-btn:hover {
+    transform: translateY(-1px);
 }
 
 /* Form actions */
