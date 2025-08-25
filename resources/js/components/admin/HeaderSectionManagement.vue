@@ -457,7 +457,7 @@ export default {
                 let response;
 
                 if (this.isEditing) {
-                    response = await axios.put(
+                    response = await axios.post(
                         `/admin/header-sections/${this.currentHeader.id}`,
                         formData
                     );

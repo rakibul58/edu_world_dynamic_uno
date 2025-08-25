@@ -14,7 +14,7 @@ class HeaderSectionSeeder extends Seeder
                 'name' => 'Default Header',
                 'logo_type' => 'image',
                 'logo_text' => 'EduSite',
-                'logo_image_path' => '/storage/header-logos/logo.png',
+                'logo_image_path' => '/public/images/logo.png',
                 'logo_tagline' => 'Quality Education for All',
                 'logo_link' => ['url' => '/', 'target' => '_self'], // Remove json_encode()
                 'buttons' => [

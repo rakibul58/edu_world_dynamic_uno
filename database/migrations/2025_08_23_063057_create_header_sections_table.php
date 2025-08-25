@@ -4,9 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateHeaderSectionsTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('header_sections', function (Blueprint $table) {
             $table->id();
@@ -22,13 +25,20 @@ class CreateHeaderSectionsTable extends Migration
             $table->json('nav_styles')->nullable();
             $table->json('advanced_settings')->nullable();
             $table->boolean('is_active')->default(false);
-            $table->integer('sort_order')->default(0);
+            $table->integer('sort_order')->default(1);
             $table->timestamps();
+
+            // Indexes
+            $table->index(['is_active', 'sort_order']);
+            $table->index('sort_order');
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('header_sections');
     }
-}
+};
