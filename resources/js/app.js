@@ -53,6 +53,11 @@ const routes = [
                 path: "manage-header-section",
                 name: "HeaderSection",
                 component: () => import("./components/admin/HeaderSectionManagement.vue"),
+            },
+            {
+                path: "manage-hero-section",
+                name: "HeroSection",
+                component: () => import("./components/admin/HeroSectionManagement.vue"),
             }
         ],
     },

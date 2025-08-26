@@ -115,22 +115,72 @@
                                 <line x1="6" y1="6" x2="10" y2="6" />
                                 <line x1="12" y1="6" x2="16" y2="6" />
                             </g>
-                            <!-- View Orders Icon -->
-                            <g v-else-if="action.icon === 'clipboard-list'">
+                            <g v-else-if="action.icon === 'hero-section'">
+                                <!-- Outer container -->
                                 <rect
-                                    x="8"
-                                    y="2"
-                                    width="8"
-                                    height="4"
+                                    x="2"
+                                    y="3"
+                                    width="20"
+                                    height="18"
+                                    rx="2"
+                                    ry="2"
+                                />
+
+                                <!-- Hero section background -->
+                                <rect
+                                    x="2"
+                                    y="3"
+                                    width="20"
+                                    height="12"
+                                    rx="2"
+                                    ry="2"
+                                    fill="currentColor"
+                                    fill-opacity="0.1"
+                                />
+
+                                <!-- Main headline -->
+                                <line
+                                    x1="5"
+                                    y1="7"
+                                    x2="14"
+                                    y2="7"
+                                    stroke-width="2.5"
+                                />
+
+                                <!-- Subtitle -->
+                                <line x1="5" y1="10" x2="11" y2="10" />
+
+                                <!-- Call-to-action button -->
+                                <rect
+                                    x="5"
+                                    y="12"
+                                    width="4"
+                                    height="2"
                                     rx="1"
-                                    ry="1"
+                                    fill="currentColor"
+                                    fill-opacity="0.2"
                                 />
-                                <path
-                                    d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+
+                                <!-- Hero image placeholder -->
+                                <rect
+                                    x="16"
+                                    y="5"
+                                    width="4"
+                                    height="3"
+                                    rx="0.5"
                                 />
-                                <line x1="9" y1="9" x2="15" y2="9" />
-                                <line x1="9" y1="13" x2="15" y2="13" />
-                                <line x1="9" y1="17" x2="13" y2="17" />
+                                <circle
+                                    cx="17"
+                                    cy="6"
+                                    r="0.5"
+                                    fill="currentColor"
+                                    fill-opacity="0.3"
+                                />
+                                <line x1="16.5" y1="7.5" x2="19.5" y2="7.5" />
+
+                                <!-- Content area below hero -->
+                                <line x1="5" y1="17" x2="10" y2="17" />
+                                <line x1="5" y1="19" x2="13" y2="19" />
                             </g>
                             <!-- Analytics Icon -->
                             <g v-else-if="action.icon === 'trending-up'">
@@ -355,13 +405,13 @@ export default {
                 disabled: false,
             },
             {
-                name: "view-orders",
-                title: "Recent Orders",
-                description: "Check latest customer orders",
-                icon: "clipboard-list",
+                name: "heroSection",
+                title: "Manage Hero",
+                description: "Update hero section content",
+                icon: "hero-section",
                 color: "#f7b731",
                 action: "navigate",
-                target: "/admin/orders",
+                target: "/admin/manage-hero-section",
                 disabled: false,
             },
             {
@@ -372,7 +422,7 @@ export default {
                 color: "#3742fa",
                 action: "navigate",
                 target: "/admin/analytics",
-                disabled: false,
+                disabled: true,
             },
             {
                 name: "settings",
@@ -382,7 +432,7 @@ export default {
                 color: "#102e4a",
                 action: "navigate",
                 target: "/admin/settings",
-                disabled: false,
+                disabled: true,
             },
             {
                 name: "reports",
@@ -392,7 +442,7 @@ export default {
                 color: "#5f27cd",
                 action: "custom",
                 handler: "generateReport",
-                disabled: false,
+                disabled: true,
             },
         ]);
 
@@ -405,7 +455,7 @@ export default {
                 icon: "users",
                 color: "#21bf6b",
                 path: "/admin/users",
-                disabled: false,
+                disabled: true,
             },
             {
                 name: "products",
@@ -414,7 +464,7 @@ export default {
                 icon: "package",
                 color: "#ff7101",
                 path: "/admin/products",
-                disabled: false,
+                disabled: true,
             },
             {
                 name: "orders",
@@ -423,7 +473,7 @@ export default {
                 icon: "shopping-bag",
                 color: "#f7b731",
                 path: "/admin/orders",
-                disabled: false,
+                disabled: true,
             },
             {
                 name: "analytics",
@@ -432,7 +482,7 @@ export default {
                 icon: "bar-chart",
                 color: "#3742fa",
                 path: "/admin/analytics",
-                disabled: false,
+                disabled: true,
             },
             {
                 name: "settings",
@@ -441,7 +491,7 @@ export default {
                 icon: "cog",
                 color: "#102e4a",
                 path: "/admin/settings",
-                disabled: false,
+                disabled: true,
             },
         ]);
 

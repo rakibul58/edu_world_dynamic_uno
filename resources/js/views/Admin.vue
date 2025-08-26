@@ -133,11 +133,77 @@
                                     <line x1="6" y1="6" x2="10" y2="6" />
                                     <line x1="12" y1="6" x2="16" y2="6" />
                                 </g>
-                                <g v-else-if="item.icon === 'orders'">
-                                    <path
-                                        d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"
+                                <g v-else-if="item.icon === 'hero-section'">
+                                    <!-- Outer container -->
+                                    <rect
+                                        x="2"
+                                        y="3"
+                                        width="20"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
                                     />
-                                    <rect x="9" y="7" width="6" height="8" />
+
+                                    <!-- Hero section background -->
+                                    <rect
+                                        x="2"
+                                        y="3"
+                                        width="20"
+                                        height="12"
+                                        rx="2"
+                                        ry="2"
+                                        fill="currentColor"
+                                        fill-opacity="0.1"
+                                    />
+
+                                    <!-- Main headline -->
+                                    <line
+                                        x1="5"
+                                        y1="7"
+                                        x2="14"
+                                        y2="7"
+                                        stroke-width="2.5"
+                                    />
+
+                                    <!-- Subtitle -->
+                                    <line x1="5" y1="10" x2="11" y2="10" />
+
+                                    <!-- Call-to-action button -->
+                                    <rect
+                                        x="5"
+                                        y="12"
+                                        width="4"
+                                        height="2"
+                                        rx="1"
+                                        fill="currentColor"
+                                        fill-opacity="0.2"
+                                    />
+
+                                    <!-- Hero image placeholder -->
+                                    <rect
+                                        x="16"
+                                        y="5"
+                                        width="4"
+                                        height="3"
+                                        rx="0.5"
+                                    />
+                                    <circle
+                                        cx="17"
+                                        cy="6"
+                                        r="0.5"
+                                        fill="currentColor"
+                                        fill-opacity="0.3"
+                                    />
+                                    <line
+                                        x1="16.5"
+                                        y1="7.5"
+                                        x2="19.5"
+                                        y2="7.5"
+                                    />
+
+                                    <!-- Content area below hero -->
+                                    <line x1="5" y1="17" x2="10" y2="17" />
+                                    <line x1="5" y1="19" x2="13" y2="19" />
                                 </g>
                                 <polyline
                                     v-else-if="item.icon === 'analytics'"
@@ -356,10 +422,10 @@ export default {
                 icon: "header-section",
             },
             {
-                name: "orders",
-                label: "Orders",
-                path: "/admin/orders",
-                icon: "orders",
+                name: "heroSection",
+                label: "Hero Management",
+                path: "/admin/manage-hero-section",
+                icon: "hero-section",
             },
             {
                 name: "analytics",
