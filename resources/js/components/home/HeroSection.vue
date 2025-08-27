@@ -1,35 +1,38 @@
 <template>
-    <section class="hero-section">
-        <!-- backgrounds -->
+    <section class="hero-section" v-if="heroData && heroData.is_active">
+        <!-- Dynamic backgrounds -->
         <div
-            class="hero-background active"
-            :style="{ backgroundImage: 'url(/uploads/slides/1.jpg)' }"
-        ></div>
-        <div
+            v-for="(background, index) in backgroundSources"
+            :key="index"
             class="hero-background"
-            :style="{ backgroundImage: 'url(/uploads/slides/2.jpg)' }"
-        ></div>
-        <div
-            class="hero-background"
-            :style="{ backgroundImage: 'url(/uploads/slides/3.jpg)' }"
-        ></div>
-        <div
-            class="hero-background"
-            :style="{ backgroundImage: 'url(/uploads/slides/4.jpg)' }"
-        ></div>
-        <div
-            class="hero-background"
-            :style="{ backgroundImage: 'url(/uploads/slides/5.jpg)' }"
+            :class="{ active: index === currentSlide }"
+            :style="getBackgroundStyle(background, index)"
         ></div>
 
         <div class="hero-overlay"></div>
 
-        <!-- overlay nav -->
-        <div class="hero-nav" :class="{ scrolled: isScrolled }">
+        <!-- Dynamic navigation (if enabled) -->
+        <div
+            v-if="heroData.show_navigation && heroData.navigation"
+            class="hero-nav"
+            :class="{ scrolled: isScrolled }"
+        >
             <div class="hero-nav-inner">
-                <a class="brand" href="#"
-                    ><img src="/public/uploads/image/logo.png" alt="Logo"
-                /></a>
+                <a class="brand" :href="heroData.navigation.logo?.url || '#'">
+                    <img
+                        v-if="
+                            heroData.navigation.logo?.type === 'image' &&
+                            heroData.navigation.logo?.image_path
+                        "
+                        :src="
+                            getLogoImageUrl(heroData.navigation.logo.image_path)
+                        "
+                        :alt="heroData.navigation.logo?.alt || 'Logo'"
+                    />
+                    <span v-else>{{
+                        heroData.navigation.logo?.text || "Logo"
+                    }}</span>
+                </a>
 
                 <div
                     class="menu-toggle"
@@ -45,28 +48,35 @@
                     :class="{ active: menuActive }"
                     aria-label="Primary"
                 >
-                    <a href="#">Home</a>
+                    <a href="#" v-if="heroData.navigation.menu_items?.length"
+                        >Home</a
+                    >
 
                     <div
                         class="dropdown"
-                        v-for="(item, index) in menuItems"
+                        v-for="(item, index) in processedMenuItems"
                         :key="index"
                     >
                         <a
-                            href="#"
+                            :href="item.url || '#'"
                             class="drop-toggle"
                             @click.prevent="toggleDropdown(index)"
-                            >{{ item.title }} ▾</a
+                            >{{ item.title }}
+                            <span v-if="item.sub_items?.length"> ▾</span></a
                         >
                         <div
                             class="dropdown-content"
-                            v-if="item.showDropdown || !isMobile"
+                            v-if="
+                                (item.showDropdown || !isMobile) &&
+                                item.sub_items?.length
+                            "
                         >
                             <a
-                                v-for="(subItem, subIndex) in item.subItems"
+                                v-for="(subItem, subIndex) in item.sub_items"
                                 :key="subIndex"
-                                href="#"
-                                >{{ subItem }}</a
+                                :href="subItem.url || '#'"
+                                :target="subItem.target || '_self'"
+                                >{{ subItem.text || subItem }}</a
                             >
                         </div>
                     </div>
@@ -74,19 +84,37 @@
             </div>
         </div>
 
-        <!-- hero content -->
+        <!-- Dynamic hero content -->
         <div class="hero-content container">
             <div class="hero-text">
                 <h2 class="hero-title">
-                    Welcome To <span style="color: #ff7101">Edu World</span>
+                    {{ heroData.title || "Welcome To" }}
+                    <span
+                        v-if="heroData.title_highlight"
+                        style="color: #ff7101"
+                    >
+                        {{ heroData.title_highlight }}</span
+                    >
                 </h2>
-                <h3 class="hero-subtitle">A Complete ERP System</h3>
+                <h3 class="hero-subtitle">
+                    {{ heroData.subtitle || "A Complete ERP System" }}
+                </h3>
                 <h1 class="hero-tagline">
-                    A complete system for educational institution management.
+                    {{
+                        heroData.tagline ||
+                        "A complete system for educational institution management."
+                    }}
                 </h1>
                 <div class="hero-ctas">
-                    <a class="btn-apply" href="#">Apply now</a>
-                    <a class="btn-learn" href="#">Learn more</a>
+                    <a
+                        v-for="(button, index) in heroData.cta_buttons ||
+                        defaultButtons"
+                        :key="index"
+                        :class="index === 0 ? 'btn-apply' : 'btn-learn'"
+                        :href="button.url || '#'"
+                        :target="button.target || '_self'"
+                        >{{ button.text }}</a
+                    >
                 </div>
             </div>
         </div>
@@ -94,94 +122,258 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
-    name: "HeroSection",
+    name: "DynamicHeroSection",
     data() {
         return {
+            heroData: null,
+            loading: false,
             isScrolled: false,
             menuActive: false,
             isMobile: false,
             currentSlide: 0,
-            menuItems: [
+            sliderInterval: null,
+            processedMenuItems: [],
+
+            // Fallback defaults (matches your original component)
+            defaultButtons: [
                 {
-                    title: "About Us",
-                    subItems: ["Our Story", "Mission & Vision"],
-                    showDropdown: false,
+                    text: "Apply now",
+                    url: "#",
+                    type: "primary",
                 },
                 {
-                    title: "Admission",
-                    subItems: ["Apply Now", "Requirements"],
-                    showDropdown: false,
-                },
-                {
-                    title: "Campus",
-                    subItems: ["Facilities", "Virtual Tour"],
-                    showDropdown: false,
-                },
-                {
-                    title: "IA Life",
-                    subItems: ["Student Life", "Events"],
-                    showDropdown: false,
-                },
-                {
-                    title: "Academics",
-                    subItems: ["Curriculum", "Programs"],
-                    showDropdown: false,
-                },
-                {
-                    title: "Information",
-                    subItems: ["News", "Resources"],
-                    showDropdown: false,
-                },
-                {
-                    title: "More",
-                    subItems: ["Contact", "Gallery"],
-                    showDropdown: false,
+                    text: "Learn more",
+                    url: "#",
+                    type: "secondary",
                 },
             ],
         };
     },
-    mounted() {
-        window.addEventListener("scroll", this.handleScroll);
-        window.addEventListener("resize", this.checkMobile);
-        this.checkMobile();
-        this.startSlider();
+    computed: {
+        backgroundSources() {
+            if (!this.heroData) return [];
+
+            // Use images if available, otherwise use gradients
+            if (this.heroData.background_images?.length) {
+                return this.heroData.background_images.map((img, index) => {
+                    let imageUrl;
+
+                    if (typeof img === "string") {
+                        imageUrl = img;
+                    } else if (img.url) {
+                        imageUrl = img.url;
+                    } else {
+                        imageUrl = img;
+                    }
+
+                    // Get corresponding gradient as fallback
+                    const gradients = this.heroData.background_gradients || [
+                        "linear-gradient(135deg, #ff7101, #102e4a)",
+                        "linear-gradient(135deg, #20bf6b, #102e4a)",
+                        "linear-gradient(135deg, #f7b731, #102e4a)",
+                        "linear-gradient(135deg, #102e4a, #030811)",
+                        "linear-gradient(135deg, #d35b00, #102e4a)",
+                    ];
+
+                    const fallbackGradient =
+                        gradients[index % gradients.length];
+
+                    return {
+                        type: "image",
+                        source: imageUrl,
+                        fallbackGradient: fallbackGradient,
+                        alt: img.alt || "Hero background image",
+                    };
+                });
+            }
+
+            // Fallback to gradients only
+            const gradients = this.heroData.background_gradients || [
+                "linear-gradient(135deg, #ff7101, #102e4a)",
+                "linear-gradient(135deg, #20bf6b, #102e4a)",
+                "linear-gradient(135deg, #f7b731, #102e4a)",
+                "linear-gradient(135deg, #102e4a, #030811)",
+                "linear-gradient(135deg, #d35b00, #102e4a)",
+            ];
+
+            return gradients.map((gradient) => ({
+                type: "gradient",
+                source: gradient,
+            }));
+        },
     },
-    beforeDestroy() {
-        window.removeEventListener("scroll", this.handleScroll);
-        window.removeEventListener("resize", this.checkMobile);
-        clearInterval(this.sliderInterval);
+
+    async mounted() {
+        await this.fetchHeroData();
+        this.setupEventListeners();
+        this.processMenuItems();
+        // Wait for next tick to ensure DOM is ready
+        this.$nextTick(() => {
+            this.startSlider();
+        });
     },
+
+    beforeUnmount() {
+        this.cleanupEventListeners();
+        if (this.sliderInterval) {
+            clearInterval(this.sliderInterval);
+        }
+    },
+
     methods: {
+        async fetchHeroData() {
+            this.loading = true;
+            try {
+                const response = await axios.get("/hero-sections/active");
+                if (response.data.success) {
+                    this.heroData = response.data.data;
+                }
+            } catch (error) {
+                console.error("Error fetching hero data:", error);
+                // Use fallback data if needed
+                this.setFallbackData();
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        setFallbackData() {
+            // Fallback to match your original hardcoded design
+            this.heroData = {
+                is_active: true,
+                show_navigation: true,
+                title: "Welcome To",
+                title_highlight: "Edu World",
+                subtitle: "A Complete ERP System",
+                tagline:
+                    "A complete system for educational institution management.",
+                background_gradients: [
+                    "linear-gradient(135deg, #ff7101, #102e4a)",
+                    "linear-gradient(135deg, #20bf6b, #102e4a)",
+                    "linear-gradient(135deg, #f7b731, #102e4a)",
+                    "linear-gradient(135deg, #102e4a, #030811)",
+                    "linear-gradient(135deg, #d35b00, #102e4a)",
+                ],
+                cta_buttons: this.defaultButtons,
+                slider_interval: 3500,
+                enable_slider: true,
+            };
+        },
+
+        setupEventListeners() {
+            window.addEventListener("scroll", this.handleScroll);
+            window.addEventListener("resize", this.checkMobile);
+            this.checkMobile();
+        },
+
+        cleanupEventListeners() {
+            window.removeEventListener("scroll", this.handleScroll);
+            window.removeEventListener("resize", this.checkMobile);
+        },
+
         handleScroll() {
             this.isScrolled = window.scrollY > 50;
         },
+
         checkMobile() {
             this.isMobile = window.innerWidth < 992;
         },
+
         toggleMenu() {
             this.menuActive = !this.menuActive;
         },
+
         toggleDropdown(index) {
             if (this.isMobile) {
-                this.menuItems.forEach((item, i) => {
+                this.processedMenuItems.forEach((item, i) => {
                     if (i !== index) {
                         item.showDropdown = false;
                     }
                 });
-                this.menuItems[index].showDropdown =
-                    !this.menuItems[index].showDropdown;
+                this.processedMenuItems[index].showDropdown =
+                    !this.processedMenuItems[index].showDropdown;
             }
         },
+
+        processMenuItems() {
+            if (!this.heroData?.navigation?.menu_items) {
+                this.processedMenuItems = [];
+                return;
+            }
+
+            this.processedMenuItems = this.heroData.navigation.menu_items.map(
+                (item) => ({
+                    ...item,
+                    showDropdown: false,
+                })
+            );
+        },
+
+        getBackgroundStyle(background, index) {
+            if (background.type === "image") {
+                return {
+                    backgroundImage: `url("${background.source}")`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                };
+            } else {
+                return {
+                    background: background.source,
+                };
+            }
+        },
+
         startSlider() {
-            const slides = document.querySelectorAll(".hero-background");
-            let idx = 0;
+            if (
+                !this.heroData?.enable_slider ||
+                this.backgroundSources.length <= 1
+            )
+                return;
+
+            const slides = this.$el.querySelectorAll(".hero-background");
+            if (!slides.length) return;
+
+            const interval = this.heroData.slider_interval || 3500;
 
             this.sliderInterval = setInterval(() => {
-                slides[idx].classList.remove("active");
-                idx = (idx + 1) % slides.length;
-                slides[idx].classList.add("active");
-            }, 3500);
+                this.currentSlide =
+                    (this.currentSlide + 1) % this.backgroundSources.length;
+            }, interval);
+        },
+
+        getLogoImageUrl(imagePath) {
+            if (!imagePath) return "";
+
+            // If it's already a full URL, return as is
+            if (imagePath.startsWith("http")) {
+                return imagePath;
+            }
+
+            // If it starts with /, use as is
+            if (imagePath.startsWith("/")) {
+                return imagePath;
+            }
+
+            // Otherwise, prepend with /
+            return "/" + imagePath;
+        },
+    },
+
+    watch: {
+        heroData: {
+            handler() {
+                this.processMenuItems();
+                this.$nextTick(() => {
+                    if (this.sliderInterval) {
+                        clearInterval(this.sliderInterval);
+                    }
+                    this.startSlider();
+                });
+            },
+            deep: true,
         },
     },
 };
@@ -200,6 +392,7 @@ export default {
     display: block;
     overflow: hidden;
 }
+
 .hero-background {
     position: absolute;
     inset: 0;
@@ -210,9 +403,12 @@ export default {
     transition: opacity 1s ease-in-out;
     transform-origin: center center;
 }
+
 .hero-background.active {
     opacity: 1;
 }
+
+/* Fallback gradients for when no images are available */
 .hero-background:nth-child(1) {
     background: linear-gradient(135deg, #ff7101, #102e4a);
 }
@@ -228,6 +424,7 @@ export default {
 .hero-background:nth-child(5) {
     background: linear-gradient(135deg, #d35b00, #102e4a);
 }
+
 .hero-overlay {
     position: absolute;
     inset: 0;
@@ -238,6 +435,7 @@ export default {
     );
     z-index: 1;
 }
+
 @keyframes zoomOut {
     0% {
         transform: scale(1.08);
@@ -246,6 +444,7 @@ export default {
         transform: scale(1);
     }
 }
+
 .hero-background {
     animation: zoomOut 8s ease-out infinite;
 }
@@ -262,9 +461,11 @@ export default {
     background: transparent;
     transition: background 0.3s ease;
 }
+
 .hero-nav.scrolled {
     background: rgba(0, 30, 60, 0.95);
 }
+
 .hero-nav-inner {
     max-width: 1240px;
     margin: 0 auto;
@@ -272,18 +473,22 @@ export default {
     align-items: center;
     justify-content: space-between;
 }
+
 .hero-nav .brand {
     display: none;
 }
+
 .hero-nav .brand img {
     width: 150px;
 }
+
 .nav-links {
     display: flex;
     gap: 16px;
     align-items: center;
     transition: all 0.5s ease-in-out;
 }
+
 .nav-links a,
 .dropdown > a {
     color: #fff;
@@ -293,14 +498,17 @@ export default {
     border-radius: 2px;
     transition: color 0.2s ease-in-out;
 }
+
 .nav-links a:hover,
 .dropdown > a:hover {
     color: #d35b00;
 }
+
 /* dropdown (desktop hover) */
 .dropdown {
     position: relative;
 }
+
 .dropdown-content {
     position: absolute;
     top: calc(100% + 6px);
@@ -313,6 +521,7 @@ export default {
     box-shadow: 0 6px 18px rgba(2, 10, 30, 0.25);
     border-top: 3px solid #ff7101;
 }
+
 .dropdown-content a {
     display: block;
     padding: 10px 16px;
@@ -320,6 +529,7 @@ export default {
     text-decoration: none;
     border-bottom: 1px solid #eee;
 }
+
 .dropdown:hover .dropdown-content {
     display: block;
 }
@@ -331,6 +541,7 @@ export default {
     gap: 5px;
     cursor: pointer;
 }
+
 .menu-toggle span {
     display: block;
     height: 3px;
@@ -348,21 +559,25 @@ export default {
     align-items: center;
     padding: 110px 20px 80px;
 }
+
 .hero-text {
     max-width: 780px;
     color: #fff;
 }
+
 .hero-title {
     font-size: 1.9rem;
     font-weight: 700;
     margin-bottom: 8px;
 }
+
 .hero-subtitle {
     color: #21bf6b;
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 12px;
 }
+
 .hero-tagline {
     font-size: 2.2rem;
     color: #f7b731;
@@ -370,10 +585,12 @@ export default {
     line-height: 1.05;
     margin-bottom: 18px;
 }
+
 .hero-ctas {
     display: flex;
     gap: 12px;
 }
+
 .btn-apply {
     background: #20bf6b;
     border: 2px solid #20bf6b;
@@ -385,11 +602,13 @@ export default {
     text-align: center;
     transition: all 0.3s ease;
 }
+
 .btn-apply:hover {
     background: transparent;
     color: #20bf6b;
     transform: translateY(-2px);
 }
+
 .btn-learn {
     background: transparent;
     border: 2px solid #ff7101;
@@ -401,6 +620,7 @@ export default {
     text-align: center;
     transition: all 0.3s ease;
 }
+
 .btn-learn:hover {
     background: #ff7101;
     color: #fff;
