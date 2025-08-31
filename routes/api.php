@@ -35,9 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('hero-sections', [HeroSectionController::class, 'index']);
         Route::get('hero-sections/{id}', [HeroSectionController::class, 'show']);
         Route::post('hero-sections', [HeroSectionController::class, 'store']);
-        Route::put('hero-sections/{id}', [HeroSectionController::class, 'update']);
+        Route::post('hero-sections/{id}', [HeroSectionController::class, 'update']);
         Route::delete('hero-sections/{id}', [HeroSectionController::class, 'destroy']);
-        Route::post('hero-sections/{id}/set-active', [HeroSectionController::class, 'setActive']);
+        Route::patch('hero-sections/{id}/set-active', [HeroSectionController::class, 'setActive']);
         Route::post('hero-sections/{id}/duplicate', [HeroSectionController::class, 'duplicate']);
         Route::post('hero-sections/upload-background-image', [HeroSectionController::class, 'uploadBackgroundImage']);
     });

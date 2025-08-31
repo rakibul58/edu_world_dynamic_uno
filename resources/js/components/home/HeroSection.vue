@@ -48,10 +48,7 @@
                     :class="{ active: menuActive }"
                     aria-label="Primary"
                 >
-                    <a href="#" v-if="heroData.navigation.menu_items?.length"
-                        >Home</a
-                    >
-
+                    
                     <div
                         class="dropdown"
                         v-for="(item, index) in processedMenuItems"

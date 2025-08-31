@@ -234,7 +234,7 @@ export default {
         onMounted(() => {
             // Redirect if already authenticated
             if (isAuthenticated.value) {
-                router.push("/admin");
+                router.push("/admin/dashboard");
             }
         });
 
