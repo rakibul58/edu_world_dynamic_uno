@@ -205,6 +205,51 @@
                                     <line x1="5" y1="17" x2="10" y2="17" />
                                     <line x1="5" y1="19" x2="13" y2="19" />
                                 </g>
+                                <g v-else-if="item.icon === 'programs-section'">
+                                    <!-- Outer container -->
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
+                                    />
+
+                                    <!-- Program card 1 -->
+                                    <rect
+                                        x="5"
+                                        y="5"
+                                        width="14"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="7" y1="7" x2="12" y2="7" />
+                                    <circle cx="16" cy="7" r="0.8" />
+
+                                    <!-- Program card 2 -->
+                                    <rect
+                                        x="5"
+                                        y="10"
+                                        width="14"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="7" y1="12" x2="13" y2="12" />
+                                    <circle cx="16" cy="12" r="0.8" />
+
+                                    <!-- Program card 3 -->
+                                    <rect
+                                        x="5"
+                                        y="15"
+                                        width="14"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="7" y1="17" x2="11" y2="17" />
+                                    <circle cx="16" cy="17" r="0.8" />
+                                </g>
+
                                 <polyline
                                     v-else-if="item.icon === 'analytics'"
                                     points="22,12 18,12 15,21 9,3 6,12 2,12"
@@ -426,6 +471,12 @@ export default {
                 label: "Hero Management",
                 path: "/admin/manage-hero-section",
                 icon: "hero-section",
+            },
+            {
+                name: "programsSection",
+                label: "Programs Management",
+                path: "/admin/manage-programs-section",
+                icon: "programs-section",
             },
             {
                 name: "analytics",

@@ -182,6 +182,51 @@
                                 <line x1="5" y1="17" x2="10" y2="17" />
                                 <line x1="5" y1="19" x2="13" y2="19" />
                             </g>
+                            <g v-else-if="action.icon === 'programs-section'">
+                                <!-- Outer container -->
+                                <rect
+                                    x="3"
+                                    y="3"
+                                    width="18"
+                                    height="18"
+                                    rx="2"
+                                    ry="2"
+                                />
+
+                                <!-- Program card 1 -->
+                                <rect
+                                    x="5"
+                                    y="5"
+                                    width="14"
+                                    height="4"
+                                    rx="1"
+                                />
+                                <line x1="7" y1="7" x2="12" y2="7" />
+                                <circle cx="16" cy="7" r="0.8" />
+
+                                <!-- Program card 2 -->
+                                <rect
+                                    x="5"
+                                    y="10"
+                                    width="14"
+                                    height="4"
+                                    rx="1"
+                                />
+                                <line x1="7" y1="12" x2="13" y2="12" />
+                                <circle cx="16" cy="12" r="0.8" />
+
+                                <!-- Program card 3 -->
+                                <rect
+                                    x="5"
+                                    y="15"
+                                    width="14"
+                                    height="4"
+                                    rx="1"
+                                />
+                                <line x1="7" y1="17" x2="11" y2="17" />
+                                <circle cx="16" cy="17" r="0.8" />
+                            </g>
+
                             <!-- Analytics Icon -->
                             <g v-else-if="action.icon === 'trending-up'">
                                 <polyline
@@ -414,6 +459,16 @@ export default {
                 target: "/admin/manage-hero-section",
                 disabled: false,
             },
+               {
+                name: "programsSection",
+                title: "Manage Programs",
+                description: "Update Programs section content",
+                icon: "programs-section",
+                color: "#a5c711",
+                action: "navigate",
+                target: "/admin/manage-programs-section",
+                disabled: false,
+            },
             {
                 name: "analytics",
                 title: "View Analytics",
@@ -466,6 +521,7 @@ export default {
                 path: "/admin/products",
                 disabled: true,
             },
+
             {
                 name: "orders",
                 title: "Order Management",
