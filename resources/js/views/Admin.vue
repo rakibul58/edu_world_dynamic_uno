@@ -250,16 +250,6 @@
                                     <circle cx="16" cy="17" r="0.8" />
                                 </g>
 
-                                <polyline
-                                    v-else-if="item.icon === 'analytics'"
-                                    points="22,12 18,12 15,21 9,3 6,12 2,12"
-                                />
-                                <g v-else-if="item.icon === 'settings'">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path
-                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
-                                    />
-                                </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
                                 item.label
@@ -449,47 +439,36 @@ export default {
         // Dynamic navigation items - easily customizable
         const navigationItems = ref([
             {
-                name: "dashboard",
+                name: "Dashboard",
                 label: "Dashboard",
                 path: "/admin/dashboard",
                 icon: "dashboard",
             },
             {
-                name: "pageSections",
+                name: "SectionsManagement",
                 label: "Sections Management",
                 path: "/admin/sections-management",
                 icon: "page-sections",
             },
             {
-                name: "headerSection",
+                name: "HeaderSection",
                 label: "Header Management",
                 path: "/admin/manage-header-section",
                 icon: "header-section",
             },
             {
-                name: "heroSection",
+                name: "HeroSection",
                 label: "Hero Management",
                 path: "/admin/manage-hero-section",
                 icon: "hero-section",
             },
             {
-                name: "programsSection",
+                name: "ProgramsSection",
                 label: "Programs Management",
                 path: "/admin/manage-programs-section",
                 icon: "programs-section",
             },
-            {
-                name: "analytics",
-                label: "Analytics",
-                path: "/admin/analytics",
-                icon: "analytics",
-            },
-            {
-                name: "settings",
-                label: "Settings",
-                path: "/admin/settings",
-                icon: "settings",
-            },
+          
         ]);
 
         // Dynamic header actions - easily customizable
@@ -522,15 +501,16 @@ export default {
         const currentPageTitle = computed(() => {
             const routeName = route.name;
             const item = navigationItems.value.find(
-                (nav) => routeName && routeName.toLowerCase().includes(nav.name)
+                (nav) => routeName && routeName.toLowerCase().includes(nav.name.toLowerCase())
             );
             return item ? item.label : "Dashboard";
         });
 
         const breadcrumbs = computed(() => {
             const routeName = route.name;
+            console.log("Current Route Name:", routeName); // Debugging line
             const item = navigationItems.value.find(
-                (nav) => routeName && routeName.toLowerCase().includes(nav.name)
+                (nav) => routeName && routeName.toLowerCase().includes(nav.name.toLowerCase())
             );
             return item ? ["Admin", item.label] : ["Admin", "Dashboard"];
         });
