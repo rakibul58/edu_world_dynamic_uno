@@ -35,9 +35,9 @@
                     <img
                         v-if="
                             sectionData.right_side_type === 'image' &&
-                            sectionData.image_url
+                            sectionData.image_path
                         "
-                        :src="sectionData.image_url"
+                        :src="'uploads/image/'+sectionData.image_path"
                         :alt="sectionData.title"
                         class="section-image"
                     />

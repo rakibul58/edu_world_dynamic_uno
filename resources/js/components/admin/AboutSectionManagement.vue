@@ -730,15 +730,21 @@ export default {
             try {
                 const formData = new FormData();
 
+                // Debug: Log the stats data before sending
+                console.log("Stats before sending:", this.formData.stats);
+
                 // Append all form fields
                 Object.keys(this.formData).forEach((key) => {
                     if (key === "stats") {
-                        // Convert stats array to JSON string for form data
-                        formData.append(
-                            key,
-                            JSON.stringify(this.formData.stats)
-                        );
-                    } else {
+                        // Make sure stats is properly formatted as an array
+                        const statsArray = Array.isArray(this.formData.stats)
+                            ? this.formData.stats
+                            : [];
+                        formData.append("stats", JSON.stringify(statsArray));
+                    } else if (
+                        this.formData[key] !== null &&
+                        this.formData[key] !== undefined
+                    ) {
                         formData.append(key, this.formData[key]);
                     }
                 });
@@ -750,7 +756,6 @@ export default {
 
                 let response;
                 if (this.editingSection) {
-                    // For updates, we need to send PUT method
                     formData.append("_method", "PUT");
                     response = await axios.post(
                         `/admin/about-sections/${this.editingSection.id}`,
@@ -773,7 +778,6 @@ export default {
                     );
                 }
 
-                // Refresh the sections list
                 await this.fetchSections();
                 this.closeForm();
                 this.showSuccess(
@@ -788,48 +792,79 @@ export default {
                 if (error.response?.data?.message) {
                     errorMessage = error.response.data.message;
                 }
+                if (error.response?.data?.errors) {
+                    // Display validation errors
+                    const errors = error.response.data.errors;
+                    errorMessage = Object.values(errors).flat().join(", ");
+                }
                 this.showError("Save Failed", errorMessage);
             } finally {
                 this.isSaving = false;
             }
         },
+
         editSection(section) {
             this.editingSection = section;
+
             // Create a deep copy of the section data
-            this.formData = { ...section };
+            this.formData = {
+                title: section.title || "",
+                description_1: section.description_1 || "",
+                description_2: section.description_2 || "",
+                background_color: section.background_color || "#f8fbfe",
+                title_color: section.title_color || "#102e4a",
+                title_font_size: section.title_font_size || "2.6rem",
+                title_font_weight: section.title_font_weight || "700",
+                text_color: section.text_color || "#111111",
+                text_font_size: section.text_font_size || "1.3rem",
+                text_font_weight: section.text_font_weight || "300",
+                gradient_start: section.gradient_start || "#ff7101",
+                gradient_end: section.gradient_end || "#102e4a",
+                gradient_direction: section.gradient_direction || "135deg",
+                right_side_type: section.right_side_type || "gradient",
+                image_icon: section.image_icon || "📚",
+                stats: [],
+            };
 
             // Handle stats properly - ensure it's an array
             if (section.stats && Array.isArray(section.stats)) {
                 this.formData.stats = section.stats.map((stat) => ({
-                    ...stat,
+                    value: stat.value || "",
+                    label: stat.label || "",
+                    number_color: stat.number_color || "#ff7101",
+                    label_color: stat.label_color || "#111111",
+                    number_font_size: stat.number_font_size || "2rem",
+                    label_font_size: stat.label_font_size || "0.9rem",
                 }));
-            } else {
-                this.formData.stats = [];
             }
 
             // Set image preview if exists
             if (section.image_url) {
                 this.imagePreview = section.image_url;
+            } else {
+                this.imagePreview = null;
             }
+
+            this.selectedImage = null;
         },
+
         async toggleSection(section) {
             try {
-                // Optimistically update the UI
                 const originalStatus = section.is_active;
-                section.is_active = !originalStatus;
 
                 if (!originalStatus) {
-                    // Activating a section - this will deactivate others
+                    // Activating a section - use the activate endpoint
                     await axios.post(
                         `/admin/about-sections/${section.id}/activate`
                     );
                     this.showSuccess(
                         "Section Activated",
-                        `"${section.title}" is now active`
+                        `"${section.title}" is now active and all other sections have been deactivated`
                     );
                 } else {
-                    // Deactivating a section
+                    // Deactivating a section - use the regular update endpoint
                     await axios.put(`/admin/about-sections/${section.id}`, {
+                        ...section,
                         is_active: false,
                     });
                     this.showSuccess(
@@ -842,12 +877,53 @@ export default {
                 await this.fetchSections();
             } catch (error) {
                 console.error("Error toggling section:", error);
-                // Revert on error
-                section.is_active = !section.is_active;
                 this.showError(
                     "Status Update Failed",
                     `Could not change status for "${section.title}"`
                 );
+            }
+        },
+
+        resetForm() {
+            this.formData = {
+                title: "",
+                description_1: "",
+                description_2: "",
+                background_color: "#f8fbfe",
+                title_color: "#102e4a",
+                title_font_size: "2.6rem",
+                title_font_weight: "700",
+                text_color: "#111111",
+                text_font_size: "1.3rem",
+                text_font_weight: "300",
+                gradient_start: "#ff7101",
+                gradient_end: "#102e4a",
+                gradient_direction: "135deg",
+                right_side_type: "gradient",
+                image_icon: "📚",
+                stats: [],
+            };
+            this.imagePreview = null;
+            this.selectedImage = null;
+        },
+
+        addStat() {
+            if (!Array.isArray(this.formData.stats)) {
+                this.formData.stats = [];
+            }
+            this.formData.stats.push({
+                value: "",
+                label: "",
+                number_color: "#ff7101",
+                label_color: "#111111",
+                number_font_size: "2rem",
+                label_font_size: "0.9rem",
+            });
+        },
+
+        removeStat(index) {
+            if (Array.isArray(this.formData.stats)) {
+                this.formData.stats.splice(index, 1);
             }
         },
         async deleteSection(id) {
