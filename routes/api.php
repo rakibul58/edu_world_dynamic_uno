@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageSectionController;
@@ -53,6 +54,13 @@ Route::middleware('auth:sanctum')->group(function () {
             // Settings management
             Route::post('/settings', [ProgramSettingController::class, 'update']);
         });
+
+        Route::get('/about-sections', [AboutSectionController::class, 'index']);
+        Route::get('/about-sections/{id}', [AboutSectionController::class, 'show']);
+        Route::post('/about-sections', [AboutSectionController::class, 'store']);
+        Route::put('/about-sections/{id}', [AboutSectionController::class, 'update']);
+        Route::delete('/about-sections/{id}', [AboutSectionController::class, 'destroy']);
+        Route::post('/about-sections/{id}/activate', [AboutSectionController::class, 'activate']);
     });
 });
 
@@ -64,7 +72,8 @@ Route::get('hero-sections/settings', [HeroSectionController::class, 'getSettings
 Route::prefix('programs')->group(function () {
     // Get all active programs (for frontend display)
     Route::get('/', [ProgramController::class, 'indexPublic']);
-    
+
     // Get global settings (for frontend display)
     Route::get('/settings', [ProgramSettingController::class, 'index']);
 });
+Route::get('/about-sections/active', [AboutSectionController::class, 'getActive']);
