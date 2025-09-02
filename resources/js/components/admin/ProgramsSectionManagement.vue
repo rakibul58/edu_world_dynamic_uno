@@ -56,6 +56,7 @@
             </div>
 
             <div class="settings-grid">
+                <!-- Section Background -->
                 <div class="form-group">
                     <label>Background Color</label>
                     <div class="color-input-group">
@@ -94,6 +95,54 @@
                     </div>
                 </div>
 
+                <!-- Wrap Container Settings -->
+                <div class="form-group">
+                    <label>Wrap Max Width</label>
+                    <div class="input-with-unit">
+                        <input
+                            type="number"
+                            v-model.number="globalSettings.wrapMaxWidth"
+                            @input="settingsChanged = true"
+                        />
+                        <span class="unit">px</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Wrap Padding</label>
+                    <input
+                        type="text"
+                        v-model="globalSettings.wrapPadding"
+                        @input="settingsChanged = true"
+                        placeholder="0 20px"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label>Wrap Margin Top</label>
+                    <div class="input-with-unit">
+                        <input
+                            type="number"
+                            v-model.number="globalSettings.wrapMarginTop"
+                            @input="settingsChanged = true"
+                        />
+                        <span class="unit">px</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Wrap Margin Top (Mobile)</label>
+                    <div class="input-with-unit">
+                        <input
+                            type="number"
+                            v-model.number="globalSettings.wrapMarginTopMobile"
+                            @input="settingsChanged = true"
+                        />
+                        <span class="unit">px</span>
+                    </div>
+                </div>
+
+                <!-- Card Settings -->
                 <div class="form-group">
                     <label>Card Background</label>
                     <textarea
@@ -143,6 +192,28 @@
                         <input
                             type="number"
                             v-model.number="globalSettings.minHeight"
+                            @input="settingsChanged = true"
+                        />
+                        <span class="unit">px</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Default Button Text</label>
+                    <input
+                        type="text"
+                        v-model="globalSettings.defaultButtonText"
+                        @input="settingsChanged = true"
+                        placeholder="Learn more"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label>Button Border Radius</label>
+                    <div class="input-with-unit">
+                        <input
+                            type="number"
+                            v-model.number="globalSettings.buttonBorderRadius"
                             @input="settingsChanged = true"
                         />
                         <span class="unit">px</span>
@@ -327,7 +398,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                <div style="margintop: 10px" class="form-group">
                                     <label>Description</label>
                                     <textarea
                                         v-model="program.description"
@@ -336,7 +407,17 @@
                                     ></textarea>
                                 </div>
 
-                                <div class="form-row">
+                                <div style="margintop: 10px" class="form-group">
+                                    <label>Button Text</label>
+                                    <input
+                                        type="text"
+                                        v-model="program.button_text"
+                                        @blur="updateProgram(program)"
+                                        placeholder="Leave empty to use default"
+                                    />
+                                </div>
+
+                                <div style="margintop: 10px" class="form-row">
                                     <div class="form-group">
                                         <label>Border Color</label>
                                         <div class="color-input-group">
@@ -430,6 +511,10 @@ export default {
                 background: "#102e4a",
                 paddingTop: 60,
                 paddingBottom: 80,
+                wrapMaxWidth: 1240,
+                wrapPadding: "0 20px",
+                wrapMarginTop: -90,
+                wrapMarginTopMobile: -60,
                 cardBackground:
                     "linear-gradient(180deg, rgba(16, 46, 74, 0.35), rgba(3, 8, 17, 0.25))",
                 borderRadius: 15,
@@ -437,6 +522,8 @@ export default {
                 backdropFilter: "blur(8px)",
                 minHeight: 280,
                 programs_per_row: "3",
+                defaultButtonText: "Learn more",
+                buttonBorderRadius: 5,
             },
             draggedIndex: null,
             dragOverIndex: null,

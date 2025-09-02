@@ -249,7 +249,20 @@
                                     <line x1="7" y1="17" x2="11" y2="17" />
                                     <circle cx="16" cy="17" r="0.8" />
                                 </g>
+                                <g v-else-if="item.icon === 'about-section'">
+                                    <!-- Person silhouette -->
+                                    <circle cx="12" cy="8" r="3" />
+                                    <path d="M17 21v-2a5 5 0 0 0-10 0v2" />
 
+                                    <!-- Information circle -->
+                                    <circle
+                                        cx="18"
+                                        cy="6"
+                                        r="1.5"
+                                        fill="currentColor"
+                                    />
+                                    <line x1="18" y1="8" x2="18" y2="10" />
+                                </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
                                 item.label
@@ -468,7 +481,12 @@ export default {
                 path: "/admin/manage-programs-section",
                 icon: "programs-section",
             },
-          
+            {
+                name: "AboutSection",
+                label: "About Management",
+                path: "/admin/manage-about-section",
+                icon: "about-section",
+            },
         ]);
 
         // Dynamic header actions - easily customizable
@@ -501,7 +519,9 @@ export default {
         const currentPageTitle = computed(() => {
             const routeName = route.name;
             const item = navigationItems.value.find(
-                (nav) => routeName && routeName.toLowerCase().includes(nav.name.toLowerCase())
+                (nav) =>
+                    routeName &&
+                    routeName.toLowerCase().includes(nav.name.toLowerCase())
             );
             return item ? item.label : "Dashboard";
         });
@@ -510,7 +530,9 @@ export default {
             const routeName = route.name;
             console.log("Current Route Name:", routeName); // Debugging line
             const item = navigationItems.value.find(
-                (nav) => routeName && routeName.toLowerCase().includes(nav.name.toLowerCase())
+                (nav) =>
+                    routeName &&
+                    routeName.toLowerCase().includes(nav.name.toLowerCase())
             );
             return item ? ["Admin", item.label] : ["Admin", "Dashboard"];
         });

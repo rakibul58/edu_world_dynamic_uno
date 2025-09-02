@@ -11,7 +11,7 @@ class Program extends Model
 
     protected $fillable = [
         'title', 'description', 'class_name', 
-        'border_color', 'btn_color', 'btn_border_color',
+        'border_color', 'btn_color', 'btn_border_color', 'button_text',
         'order', 'is_active'
     ];
 }

@@ -14,7 +14,11 @@
             @mouseover="setHover(true)"
             @mouseleave="setHover(false)"
         >
-            Learn more
+            {{
+                program.button_text ||
+                globalSettings.defaultButtonText ||
+                "Learn more"
+            }}
         </a>
     </div>
 </template>
@@ -42,27 +46,26 @@ export default {
         cardStyles() {
             return {
                 background: this.globalSettings.cardBackground,
-                borderRadius: this.globalSettings.borderRadius,
-                border: `${this.globalSettings.borderWidth} solid ${this.program.border_color}`,
+                borderRadius: `${this.globalSettings.borderRadius}px`,
+                border: `${this.globalSettings.borderWidth}px solid ${this.program.border_color}`,
                 backdropFilter: this.globalSettings.backdropFilter,
-                minHeight: this.globalSettings.minHeight,
+                minHeight: `${this.globalSettings.minHeight}px`,
             };
         },
         btnStyles() {
-            // Apply the original hover effect logic
             return {
                 background: this.isHovered
                     ? "transparent"
                     : this.program.btn_color,
                 border: `2px solid ${this.program.btn_border_color}`,
                 color: this.isHovered ? this.program.btn_border_color : "#fff",
+                borderRadius: `${this.globalSettings.buttonBorderRadius}px`,
             };
         },
     },
     methods: {
         setHover(hoverState) {
             this.isHovered = hoverState;
-            // Emit events to parent component if needed
             if (hoverState) {
                 this.$emit("hover");
             } else {
@@ -127,7 +130,6 @@ export default {
 .btn-program {
     display: inline-block;
     padding: 10px 30px;
-    border-radius: 5px;
     text-decoration: none;
     font-weight: 500;
     margin-top: 12px;
@@ -135,7 +137,6 @@ export default {
     text-align: center;
 }
 
-/* Original hover effect from the initial design */
 .btn-program:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);

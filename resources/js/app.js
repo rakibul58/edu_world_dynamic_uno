@@ -63,6 +63,11 @@ const routes = [
                 path: "manage-programs-section",
                 name: "ProgramsSection",
                 component: () => import("./components/admin/ProgramsSectionManagement.vue"),
+            },
+            {
+                path: "manage-about-section",
+                name: "AboutSection",
+                component: () => import("./components/admin/AboutSectionManagement.vue"),
             }
         ],
     },
