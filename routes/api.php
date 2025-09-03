@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AboutSectionController;
+use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageSectionController;
@@ -61,6 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/about-sections/{id}', [AboutSectionController::class, 'update']);
         Route::delete('/about-sections/{id}', [AboutSectionController::class, 'destroy']);
         Route::post('/about-sections/{id}/activate', [AboutSectionController::class, 'activate']);
+
+        Route::resource('cta-sections', CtaSectionController::class);
+        Route::post('cta-sections/{ctaSection}/activate', [CtaSectionController::class, 'activate']);
+        Route::post('cta-sections/reorder', [CtaSectionController::class, 'reorder']);
     });
 });
 
@@ -76,4 +81,7 @@ Route::prefix('programs')->group(function () {
     // Get global settings (for frontend display)
     Route::get('/settings', [ProgramSettingController::class, 'index']);
 });
+
 Route::get('/about-sections/active', [AboutSectionController::class, 'getActive']);
+Route::get('cta-sections/active', [CtaSectionController::class, 'getActive']);
+Route::get('cta-sections/{ctaSection}', [CtaSectionController::class, 'show']);

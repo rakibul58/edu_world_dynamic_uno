@@ -468,37 +468,7 @@ export default {
                 action: "navigate",
                 target: "/admin/manage-programs-section",
                 disabled: false,
-            },
-            {
-                name: "analytics",
-                title: "View Analytics",
-                description: "Check performance metrics",
-                icon: "trending-up",
-                color: "#3742fa",
-                action: "navigate",
-                target: "/admin/analytics",
-                disabled: true,
-            },
-            {
-                name: "settings",
-                title: "Site Settings",
-                description: "Configure application settings",
-                icon: "settings",
-                color: "#102e4a",
-                action: "navigate",
-                target: "/admin/settings",
-                disabled: true,
-            },
-            {
-                name: "reports",
-                title: "Generate Report",
-                description: "Create custom reports",
-                icon: "file-text",
-                color: "#5f27cd",
-                action: "custom",
-                handler: "generateReport",
-                disabled: true,
-            },
+            }
         ]);
 
         // Dynamic Navigation Links - Easy to modify

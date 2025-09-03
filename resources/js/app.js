@@ -68,6 +68,11 @@ const routes = [
                 path: "manage-about-section",
                 name: "AboutSection",
                 component: () => import("./components/admin/AboutSectionManagement.vue"),
+            },
+            {
+                path: "manage-cta-section",
+                name: "CtaSection",
+                component: () => import("./components/admin/CtaSectionManagement.vue"),
             }
         ],
     },

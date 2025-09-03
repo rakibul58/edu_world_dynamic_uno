@@ -263,6 +263,41 @@
                                     />
                                     <line x1="18" y1="8" x2="18" y2="10" />
                                 </g>
+                                <g v-else-if="item.icon === 'cta-section'">
+                                    <!-- Outer container -->
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="1"
+                                    />
+
+                                    <!-- Text content -->
+                                    <line x1="7" y1="8" x2="17" y2="8" />
+                                    <line x1="7" y1="10" x2="14" y2="10" />
+
+                                    <!-- Primary CTA button -->
+                                    <rect
+                                        x="7"
+                                        y="13"
+                                        width="6"
+                                        height="3"
+                                        rx="1.5"
+                                        fill="currentColor"
+                                        fill-opacity="0.2"
+                                    />
+                                    <line
+                                        x1="9"
+                                        y1="14.5"
+                                        x2="11"
+                                        y2="14.5"
+                                        stroke-width="1.5"
+                                    />
+
+                                    <!-- Secondary link -->
+                                    <line x1="15" y1="14.5" x2="17" y2="14.5" />
+                                </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
                                 item.label
@@ -486,6 +521,12 @@ export default {
                 label: "About Management",
                 path: "/admin/manage-about-section",
                 icon: "about-section",
+            },
+            {
+                name: "CtaSection",
+                label: "CTA Management",
+                path: "/admin/manage-cta-section",
+                icon: "cta-section",
             },
         ]);
 
