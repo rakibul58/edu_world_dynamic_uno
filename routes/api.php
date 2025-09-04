@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AboutSectionController;
+use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -66,6 +67,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('cta-sections', CtaSectionController::class);
         Route::post('cta-sections/{ctaSection}/activate', [CtaSectionController::class, 'activate']);
         Route::post('cta-sections/reorder', [CtaSectionController::class, 'reorder']);
+        Route::apiResource('admission-processes', AdmissionProcessController::class);
+        Route::post('admission-processes/{admissionProcess}/activate', [AdmissionProcessController::class, 'activate']);
     });
 });
 
@@ -85,3 +88,4 @@ Route::prefix('programs')->group(function () {
 Route::get('/about-sections/active', [AboutSectionController::class, 'getActive']);
 Route::get('cta-sections/active', [CtaSectionController::class, 'getActive']);
 Route::get('cta-sections/{ctaSection}', [CtaSectionController::class, 'show']);
+Route::get('admission-process/active', [AdmissionProcessController::class, 'getActive']);

@@ -298,6 +298,51 @@
                                     <!-- Secondary link -->
                                     <line x1="15" y1="14.5" x2="17" y2="14.5" />
                                 </g>
+                                <g
+                                    v-else-if="
+                                        item.icon === 'admission-process-section'
+                                    "
+                                >
+                                    <!-- Outer document -->
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
+                                    />
+
+                                    <!-- Step 1 -->
+                                    <circle
+                                        cx="7"
+                                        cy="8"
+                                        r="1"
+                                        fill="currentColor"
+                                    />
+                                    <line x1="10" y1="8" x2="17" y2="8" />
+
+                                    <!-- Step 2 -->
+                                    <circle
+                                        cx="7"
+                                        cy="12"
+                                        r="1"
+                                        fill="currentColor"
+                                    />
+                                    <line x1="10" y1="12" x2="17" y2="12" />
+
+                                    <!-- Step 3 -->
+                                    <circle
+                                        cx="7"
+                                        cy="16"
+                                        r="1"
+                                        fill="currentColor"
+                                    />
+                                    <line x1="10" y1="16" x2="17" y2="16" />
+
+                                    <!-- Checkmark for completion -->
+                                    <path d="M15 19l2 2l4-4" stroke-width="2" />
+                                </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
                                 item.label
@@ -528,6 +573,12 @@ export default {
                 path: "/admin/manage-cta-section",
                 icon: "cta-section",
             },
+            {
+                name: "AdmissionProcessSection",
+                label: "Admission Process",
+                path: "/admin/manage-admission-process-section",
+                icon: "admission-process-section",
+            }
         ]);
 
         // Dynamic header actions - easily customizable

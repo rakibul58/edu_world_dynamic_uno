@@ -73,6 +73,11 @@ const routes = [
                 path: "manage-cta-section",
                 name: "CtaSection",
                 component: () => import("./components/admin/CtaSectionManagement.vue"),
+            },
+            {
+                path: "manage-admission-process-section",
+                name: "AdmissionProcessSection",
+                component: () => import("./components/admin/AdmissionProcessSectionManagement.vue"),
             }
         ],
     },
