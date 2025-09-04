@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { createStore } from "vuex";
 import axios from "axios";
 import App from "./App.vue";
+import routes from "./router/routes";
 
 // Configure axios
 axios.defaults.baseURL = "/api";
@@ -14,11 +15,6 @@ if (token) {
     axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
 }
 
-// Import components
-import Home from "./views/Home.vue";
-import Admin from "./views/Admin.vue";
-import Login from "./views/Login.vue";
-
 // Store modules
 import authModule from "./store/modules/auth";
 
@@ -28,66 +24,6 @@ const store = createStore({
         auth: authModule,
     },
 });
-
-// Create router
-const routes = [
-    { path: "/", name: "Home", component: Home },
-    {
-        path: "/admin",
-        name: "Admin",
-        component: Admin,
-        meta: { requiresAuth: true },
-        children: [
-            {
-                path: "dashboard",
-                name: "Dashboard",
-                component: () => import("./components/admin/Dashboard.vue"),
-            },
-            {
-                path: "sections-management",
-                name: "SectionsManagement",
-                component: () =>
-                    import("./components/admin/SectionManager.vue"),
-            },
-            {
-                path: "manage-header-section",
-                name: "HeaderSection",
-                component: () => import("./components/admin/HeaderSectionManagement.vue"),
-            },
-            {
-                path: "manage-hero-section",
-                name: "HeroSection",
-                component: () => import("./components/admin/HeroSectionManagement.vue"),
-            },
-            {
-                path: "manage-programs-section",
-                name: "ProgramsSection",
-                component: () => import("./components/admin/ProgramsSectionManagement.vue"),
-            },
-            {
-                path: "manage-about-section",
-                name: "AboutSection",
-                component: () => import("./components/admin/AboutSectionManagement.vue"),
-            },
-            {
-                path: "manage-cta-section",
-                name: "CtaSection",
-                component: () => import("./components/admin/CtaSectionManagement.vue"),
-            },
-            {
-                path: "manage-admission-process-section",
-                name: "AdmissionProcessSection",
-                component: () => import("./components/admin/AdmissionProcessSectionManagement.vue"),
-            },
-            {
-                path: "manage-location-section",
-                name: "LocationSection",
-                component: () => import("./components/admin/LocationSectionManagement.vue"),
-            }
-        ],
-    },
-    { path: "/login", name: "Login", component: Login },
-];
 
 const router = createRouter({
     history: createWebHistory(),

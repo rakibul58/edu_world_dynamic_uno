@@ -386,6 +386,57 @@
                                         stroke-opacity="0.3"
                                     />
                                 </g>
+                                <g v-else-if="item.icon === 'feature-section'">
+                                    <!-- Outer container -->
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
+                                    />
+
+                                    <!-- Feature block 1 -->
+                                    <rect
+                                        x="5"
+                                        y="5"
+                                        width="5"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="5" y1="10" x2="10" y2="10" />
+
+                                    <!-- Feature block 2 -->
+                                    <rect
+                                        x="14"
+                                        y="5"
+                                        width="5"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="14" y1="10" x2="19" y2="10" />
+
+                                    <!-- Feature block 3 -->
+                                    <rect
+                                        x="5"
+                                        y="12"
+                                        width="5"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="5" y1="17" x2="10" y2="17" />
+
+                                    <!-- Feature block 4 -->
+                                    <rect
+                                        x="14"
+                                        y="12"
+                                        width="5"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="14" y1="17" x2="19" y2="17" />
+                                </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
                                 item.label
@@ -611,10 +662,16 @@ export default {
                 icon: "about-section",
             },
             {
-                name: "CtaSection",
-                label: "CTA Management",
-                path: "/admin/manage-cta-section",
-                icon: "cta-section",
+                name: "FeatureSection",
+                label: "Feature Management",
+                path: "/admin/manage-feature-section",
+                icon: "feature-section",
+            },
+            {
+                name: "LocationSection",
+                label: "Location Management",
+                path: "/admin/manage-location-section",
+                icon: "location-section",
             },
             {
                 name: "AdmissionProcessSection",
@@ -623,11 +680,11 @@ export default {
                 icon: "admission-process-section",
             },
             {
-                name: "LocationSection",
-                label: "Location Management",
-                path: "/admin/manage-location-section",
-                icon: "location-section",
-            }
+                name: "CtaSection",
+                label: "CTA Management",
+                path: "/admin/manage-cta-section",
+                icon: "cta-section",
+            },
         ]);
 
         // Dynamic header actions - easily customizable
