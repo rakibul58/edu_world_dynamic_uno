@@ -1948,35 +1948,4 @@ textarea.form-control {
         width: 100%;
     }
 }
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .admin-admission-process {
-        background: #111827;
-    }
-
-    .admin-header,
-    .list-header,
-    .process-card,
-    .modal-content {
-        background: #1f2937;
-        color: #f9fafb;
-    }
-
-    .form-section {
-        background: #374151;
-    }
-
-    .form-control {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f9fafb;
-    }
-
-    .empty-state,
-    .loading-state {
-        background: #1f2937;
-        border-color: #4b5563;
-    }
-}
 </style>
