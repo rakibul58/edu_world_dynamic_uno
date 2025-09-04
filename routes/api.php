@@ -5,11 +5,15 @@ use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactCardController;
 use App\Http\Controllers\PageSectionController;
 use App\Http\Controllers\HeaderSectionController;
 use App\Http\Controllers\HeroSectionController;
+use App\Http\Controllers\LocationMapController;
+use App\Http\Controllers\LocationSectionController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProgramSettingController;
+use App\Http\Controllers\SectionStyleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('cta-sections/reorder', [CtaSectionController::class, 'reorder']);
         Route::apiResource('admission-processes', AdmissionProcessController::class);
         Route::post('admission-processes/{admissionProcess}/activate', [AdmissionProcessController::class, 'activate']);
+        Route::apiResource('location-sections', LocationSectionController::class);
+        Route::apiResource('contact-cards', ContactCardController::class);
+        Route::post('contact-cards/reorder', [ContactCardController::class, 'reorder']);
+        Route::apiResource('location-maps', LocationMapController::class)->except(['index', 'show']);
+        Route::apiResource('section-styles', SectionStyleController::class);
+        Route::post('section-styles/bulk-update', [SectionStyleController::class, 'bulkUpdate']);
     });
 });
 
@@ -89,3 +99,4 @@ Route::get('/about-sections/active', [AboutSectionController::class, 'getActive'
 Route::get('cta-sections/active', [CtaSectionController::class, 'getActive']);
 Route::get('cta-sections/{ctaSection}', [CtaSectionController::class, 'show']);
 Route::get('admission-process/active', [AdmissionProcessController::class, 'getActive']);
+Route::get('/location-section/public', [LocationSectionController::class, 'getPublicData']);

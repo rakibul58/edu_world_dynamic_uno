@@ -78,6 +78,11 @@ const routes = [
                 path: "manage-admission-process-section",
                 name: "AdmissionProcessSection",
                 component: () => import("./components/admin/AdmissionProcessSectionManagement.vue"),
+            },
+            {
+                path: "manage-location-section",
+                name: "LocationSection",
+                component: () => import("./components/admin/LocationSectionManagement.vue"),
             }
         ],
     },

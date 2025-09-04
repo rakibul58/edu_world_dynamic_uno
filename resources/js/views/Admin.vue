@@ -300,7 +300,8 @@
                                 </g>
                                 <g
                                     v-else-if="
-                                        item.icon === 'admission-process-section'
+                                        item.icon ===
+                                        'admission-process-section'
                                     "
                                 >
                                     <!-- Outer document -->
@@ -342,6 +343,48 @@
 
                                     <!-- Checkmark for completion -->
                                     <path d="M15 19l2 2l4-4" stroke-width="2" />
+                                </g>
+                                <g v-else-if="item.icon === 'location-section'">
+                                    <!-- Outer container -->
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
+                                    />
+
+                                    <!-- Map pin -->
+                                    <path
+                                        d="M12 7a3 3 0 0 1 3 3c0 2-3 7-3 7s-3-5-3-7a3 3 0 0 1 3-3z"
+                                        fill="currentColor"
+                                        fill-opacity="0.2"
+                                    />
+                                    <circle
+                                        cx="12"
+                                        cy="10"
+                                        r="1"
+                                        fill="currentColor"
+                                    />
+
+                                    <!-- Optional small roads/lines -->
+                                    <line
+                                        x1="5"
+                                        y1="18"
+                                        x2="19"
+                                        y2="18"
+                                        stroke-width="1"
+                                        stroke-opacity="0.5"
+                                    />
+                                    <line
+                                        x1="5"
+                                        y1="16"
+                                        x2="19"
+                                        y2="16"
+                                        stroke-width="1"
+                                        stroke-opacity="0.3"
+                                    />
                                 </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
@@ -578,6 +621,12 @@ export default {
                 label: "Admission Process",
                 path: "/admin/manage-admission-process-section",
                 icon: "admission-process-section",
+            },
+            {
+                name: "LocationSection",
+                label: "Location Management",
+                path: "/admin/manage-location-section",
+                icon: "location-section",
             }
         ]);
 
