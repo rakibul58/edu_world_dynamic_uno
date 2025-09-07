@@ -6,6 +6,7 @@ use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactCardController;
+use App\Http\Controllers\FooterSectionController;
 use App\Http\Controllers\PageSectionController;
 use App\Http\Controllers\HeaderSectionController;
 use App\Http\Controllers\HeroSectionController;
@@ -79,6 +80,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('location-maps', LocationMapController::class)->except(['index', 'show']);
         Route::apiResource('section-styles', SectionStyleController::class);
         Route::post('section-styles/bulk-update', [SectionStyleController::class, 'bulkUpdate']);
+        Route::get('footer-sections', [FooterSectionController::class, 'index']);
+        Route::post('footer-sections', [FooterSectionController::class, 'store']);
+        Route::get('footer-sections/{footerSection}', [FooterSectionController::class, 'show']);
+        Route::put('footer-sections/{footerSection}', [FooterSectionController::class, 'update']);
+        Route::delete('footer-sections/{footerSection}', [FooterSectionController::class, 'destroy']);
+        Route::post('footer-sections/{footerSection}/activate', [FooterSectionController::class, 'activate']);
     });
 });
 
@@ -100,3 +107,4 @@ Route::get('cta-sections/active', [CtaSectionController::class, 'getActive']);
 Route::get('cta-sections/{ctaSection}', [CtaSectionController::class, 'show']);
 Route::get('admission-process/active', [AdmissionProcessController::class, 'getActive']);
 Route::get('/location-section/public', [LocationSectionController::class, 'getPublicData']);
+Route::get('/footer-sections/active', [FooterSectionController::class, 'getActive']);

@@ -72,6 +72,12 @@ const routes = [
                 component: () =>
                     import("../components/admin/FeatureSectionManagement.vue"),
             },
+            {
+                path: "manage-footer-section",
+                name: "FooterSection",
+                component: () =>
+                    import("../components/admin/FooterSectionManagement.vue"),
+            },
         ],
     },
     { path: "/login", name: "Login", component: Login },
