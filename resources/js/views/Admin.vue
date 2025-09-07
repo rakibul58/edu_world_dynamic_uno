@@ -437,6 +437,93 @@
                                     />
                                     <line x1="14" y1="17" x2="19" y2="17" />
                                 </g>
+                                <g
+                                    v-else-if="
+                                        item.icon === 'testimonials-section'
+                                    "
+                                >
+                                    <!-- Quote symbol -->
+                                    <path d="M7 8h3v3H7zM14 8h3v3h-3z" />
+                                    <path d="M7 13h3v4H7zM14 13h3v4h-3z" />
+                                </g>
+
+                                <!-- Gallery -->
+                                <g v-else-if="item.icon === 'gallery-section'">
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                        ry="2"
+                                    />
+                                    <circle cx="9" cy="9" r="2" />
+                                    <path d="M3 17l5-5 4 4 5-6 4 7" />
+                                </g>
+
+                                <!-- Facilities -->
+                                <g
+                                    v-else-if="
+                                        item.icon === 'facilities-section'
+                                    "
+                                >
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="16"
+                                        rx="2"
+                                    />
+                                    <path d="M7 20V4M17 20V4" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                    <line x1="3" y1="15" x2="21" y2="15" />
+                                </g>
+
+                                <!-- Academic Programs -->
+                                <g
+                                    v-else-if="
+                                        item.icon === 'academic-programs'
+                                    "
+                                >
+                                    <path d="M12 3l9 4-9 4-9-4 9-4z" />
+                                    <path d="M12 11v10" />
+                                    <path d="M5 20h14" />
+                                </g>
+
+                                <!-- News & Events -->
+                                <g v-else-if="item.icon === 'news-events'">
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="16"
+                                        rx="2"
+                                    />
+                                    <line x1="7" y1="8" x2="17" y2="8" />
+                                    <line x1="7" y1="12" x2="17" y2="12" />
+                                    <line x1="7" y1="16" x2="12" y2="16" />
+                                    <circle cx="17" cy="16" r="1.2" />
+                                </g>
+
+                                <!-- Footer -->
+                                <g v-else-if="item.icon === 'footer-section'">
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="16"
+                                        rx="2"
+                                    />
+                                    <rect
+                                        x="3"
+                                        y="16"
+                                        width="18"
+                                        height="4"
+                                        rx="1"
+                                    />
+                                    <line x1="6" y1="18" x2="10" y2="18" />
+                                    <line x1="12" y1="18" x2="16" y2="18" />
+                                </g>
                             </svg>
                             <span class="nav-text" v-if="!sidebarCollapsed">{{
                                 item.label
@@ -668,6 +755,36 @@ export default {
                 icon: "feature-section",
             },
             {
+                name: "TestimonialSection",
+                label: "Testimonial Management",
+                path: "/admin/manage-testimonial-section",
+                icon: "testimonials-section",
+            },
+            {
+                name: "GallerySection",
+                label: "Gallery Management",
+                path: "/admin/manage-gallery-section",
+                icon: "gallery-section",
+            },
+            {
+                name: "FacilitiesSection",
+                label: "Facilities Management",
+                path: "/admin/manage-facilities-section",
+                icon: "facilities-section",
+            },
+            {
+                name: "AcademicPrograms",
+                label: "Academic Programs",
+                path: "/admin/manage-academic-programs",
+                icon: "academic-programs",
+            },
+            {
+                name: "NewsEvents",
+                label: "News & Events",
+                path: "/admin/manage-news-events",
+                icon: "news-events",
+            },
+            {
                 name: "LocationSection",
                 label: "Location Management",
                 path: "/admin/manage-location-section",
@@ -684,6 +801,12 @@ export default {
                 label: "CTA Management",
                 path: "/admin/manage-cta-section",
                 icon: "cta-section",
+            },
+            {
+                name: "FooterSection",
+                label: "Footer Management",
+                path: "/admin/manage-footer-section",
+                icon: "footer-section",
             },
         ]);
 
