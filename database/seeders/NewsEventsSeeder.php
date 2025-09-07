@@ -1,0 +1,227 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\NewsEvent;
+use App\Models\NewsEventsSectionSettings;
+
+class NewsEventsSeeder extends Seeder
+{
+    public function run()
+    {
+        // Create section settings
+        NewsEventsSectionSettings::create([
+            'key' => 'main_settings',
+            'section_title' => 'Latest News & Upcoming Events',
+            'section_description' => 'Stay updated with the latest happenings at Edu World.',
+            'section_title_color' => '#102e4a',
+            'section_title_font_size' => '2.5rem',
+            'section_title_font_weight' => '700',
+            'section_description_color' => '#111111',
+            'section_description_font_size' => '1.1rem',
+            'section_description_font_weight' => '400',
+            'section_background_color' => '#ffffff',
+            'section_padding' => '80px 0',
+            'grid_columns' => 'repeat(auto-fit, minmax(350px, 1fr))',
+            'grid_gap' => '30px',
+            'container_max_width' => '1240px',
+            'container_padding' => '0 20px',
+            'header_text_align' => 'center',
+            'header_margin_bottom' => '60px',
+            'enable_animations' => true,
+            'animation_duration' => '0.6s',
+            'animation_delay_increment' => '0.1s',
+            'mobile_breakpoint' => '768px',
+            'mobile_grid_columns' => '1fr',
+            'is_active' => true
+        ]);
+
+        // Create sample news events
+        NewsEvent::create([
+            'title' => 'Science Fair Winners Announced',
+            'date' => '2025-03-15',
+            'description' => 'Our students excel in the regional science competition with innovative projects combining Islamic principles and modern science.',
+            'link' => '#',
+            'card_background_type' => 'gradient',
+            'icon' => '🏆',
+            'gradient_start' => '#ff7101',
+            'gradient_end' => '#d35b00',
+            'gradient_direction' => '135deg',
+            'title_color' => '#102e4a',
+            'title_font_size' => '1.3rem',
+            'title_font_weight' => '600',
+            'description_color' => '#111111',
+            'description_font_size' => '1rem',
+            'description_font_weight' => '400',
+            'date_color' => '#ff7101',
+            'date_font_size' => '0.9rem',
+            'date_font_weight' => '600',
+            'link_color' => '#ff7101',
+            'link_hover_color' => '#d35b00',
+            'link_font_weight' => '600',
+            'card_border_radius' => '15px',
+            'card_shadow' => '0 5px 20px rgba(0, 0, 0, 0.08)',
+            'card_hover_shadow' => '0 15px 30px rgba(0, 0, 0, 0.15)',
+            'card_hover_transform' => 'translateY(-10px)',
+            'card_background_color' => '#ffffff',
+            'is_active' => true,
+            'order' => 1
+        ]);
+
+        NewsEvent::create([
+            'title' => 'Ramadan Program Launch',
+            'date' => '2025-03-20',
+            'description' => 'Special Ramadan activities including Tarawih prayers, community iftar, and Quran recitation competitions.',
+            'link' => '#',
+            'card_background_type' => 'gradient',
+            'icon' => '📖',
+            'gradient_start' => '#20bf6b',
+            'gradient_end' => '#27ae60',
+            'gradient_direction' => '135deg',
+            'title_color' => '#102e4a',
+            'title_font_size' => '1.3rem',
+            'title_font_weight' => '600',
+            'description_color' => '#111111',
+            'description_font_size' => '1rem',
+            'description_font_weight' => '400',
+            'date_color' => '#ff7101',
+            'date_font_size' => '0.9rem',
+            'date_font_weight' => '600',
+            'link_color' => '#ff7101',
+            'link_hover_color' => '#d35b00',
+            'link_font_weight' => '600',
+            'card_border_radius' => '15px',
+            'card_shadow' => '0 5px 20px rgba(0, 0, 0, 0.08)',
+            'card_hover_shadow' => '0 15px 30px rgba(0, 0, 0, 0.15)',
+            'card_hover_transform' => 'translateY(-10px)',
+            'card_background_color' => '#ffffff',
+            'is_active' => true,
+            'order' => 2
+        ]);
+
+        NewsEvent::create([
+            'title' => 'Graduation Ceremony 2025',
+            'date' => '2025-04-05',
+            'description' => 'Celebrating our graduates as they move on to prestigious universities around the world.',
+            'link' => '#',
+            'card_background_type' => 'gradient',
+            'icon' => '🎓',
+            'gradient_start' => '#f7b731',
+            'gradient_end' => '#f39c12',
+            'gradient_direction' => '135deg',
+            'title_color' => '#102e4a',
+            'title_font_size' => '1.3rem',
+            'title_font_weight' => '600',
+            'description_color' => '#111111',
+            'description_font_size' => '1rem',
+            'description_font_weight' => '400',
+            'date_color' => '#ff7101',
+            'date_font_size' => '0.9rem',
+            'date_font_weight' => '600',
+            'link_color' => '#ff7101',
+            'link_hover_color' => '#d35b00',
+            'link_font_weight' => '600',
+            'card_border_radius' => '15px',
+            'card_shadow' => '0 5px 20px rgba(0, 0, 0, 0.08)',
+            'card_hover_shadow' => '0 15px 30px rgba(0, 0, 0, 0.15)',
+            'card_hover_transform' => 'translateY(-10px)',
+            'card_background_color' => '#ffffff',
+            'is_active' => true,
+            'order' => 3
+        ]);
+
+        NewsEvent::create([
+            'title' => 'New Library Opening',
+            'date' => '2025-04-15',
+            'description' => 'Grand opening of our state-of-the-art digital library with over 50,000 books and research materials.',
+            'link' => '#',
+            'card_background_type' => 'gradient',
+            'icon' => '📚',
+            'gradient_start' => '#6c5ce7',
+            'gradient_end' => '#5f3dc4',
+            'gradient_direction' => '135deg',
+            'title_color' => '#102e4a',
+            'title_font_size' => '1.3rem',
+            'title_font_weight' => '600',
+            'description_color' => '#111111',
+            'description_font_size' => '1rem',
+            'description_font_weight' => '400',
+            'date_color' => '#ff7101',
+            'date_font_size' => '0.9rem',
+            'date_font_weight' => '600',
+            'link_color' => '#ff7101',
+            'link_hover_color' => '#d35b00',
+            'link_font_weight' => '600',
+            'card_border_radius' => '15px',
+            'card_shadow' => '0 5px 20px rgba(0, 0, 0, 0.08)',
+            'card_hover_shadow' => '0 15px 30px rgba(0, 0, 0, 0.15)',
+            'card_hover_transform' => 'translateY(-10px)',
+            'card_background_color' => '#ffffff',
+            'is_active' => true,
+            'order' => 4
+        ]);
+
+        NewsEvent::create([
+            'title' => 'Sports Day Competition',
+            'date' => '2025-05-01',
+            'description' => 'Annual inter-house sports competition featuring athletics, football, cricket, and traditional games.',
+            'link' => '#',
+            'card_background_type' => 'gradient',
+            'icon' => '🏃‍♂️',
+            'gradient_start' => '#fd79a8',
+            'gradient_end' => '#e84393',
+            'gradient_direction' => '135deg',
+            'title_color' => '#102e4a',
+            'title_font_size' => '1.3rem',
+            'title_font_weight' => '600',
+            'description_color' => '#111111',
+            'description_font_size' => '1rem',
+            'description_font_weight' => '400',
+            'date_color' => '#ff7101',
+            'date_font_size' => '0.9rem',
+            'date_font_weight' => '600',
+            'link_color' => '#ff7101',
+            'link_hover_color' => '#d35b00',
+            'link_font_weight' => '600',
+            'card_border_radius' => '15px',
+            'card_shadow' => '0 5px 20px rgba(0, 0, 0, 0.08)',
+            'card_hover_shadow' => '0 15px 30px rgba(0, 0, 0, 0.15)',
+            'card_hover_transform' => 'translateY(-10px)',
+            'card_background_color' => '#ffffff',
+            'is_active' => true,
+            'order' => 5
+        ]);
+
+        NewsEvent::create([
+            'title' => 'Art Exhibition Opening',
+            'date' => '2025-05-15',
+            'description' => 'Student art exhibition showcasing creative works inspired by Islamic art and contemporary themes.',
+            'link' => '#',
+            'card_background_type' => 'gradient',
+            'icon' => '🎨',
+            'gradient_start' => '#00cec9',
+            'gradient_end' => '#00b894',
+            'gradient_direction' => '135deg',
+            'title_color' => '#102e4a',
+            'title_font_size' => '1.3rem',
+            'title_font_weight' => '600',
+            'description_color' => '#111111',
+            'description_font_size' => '1rem',
+            'description_font_weight' => '400',
+            'date_color' => '#ff7101',
+            'date_font_size' => '0.9rem',
+            'date_font_weight' => '600',
+            'link_color' => '#ff7101',
+            'link_hover_color' => '#d35b00',
+            'link_font_weight' => '600',
+            'card_border_radius' => '15px',
+            'card_shadow' => '0 5px 20px rgba(0, 0, 0, 0.08)',
+            'card_hover_shadow' => '0 15px 30px rgba(0, 0, 0, 0.15)',
+            'card_hover_transform' => 'translateY(-10px)',
+            'card_background_color' => '#ffffff',
+            'is_active' => false, // Example of inactive event
+            'order' => 6
+        ]);
+    }
+}

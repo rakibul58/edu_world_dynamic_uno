@@ -78,6 +78,11 @@ const routes = [
                 component: () =>
                     import("../components/admin/FooterSectionManagement.vue"),
             },
+            {
+                path: "manage-news-events-section",
+                name: "NewsEventsSection",
+                component: () => import("../components/admin/NewsEventsSectionManagement.vue"),
+            }
         ],
     },
     { path: "/login", name: "Login", component: Login },

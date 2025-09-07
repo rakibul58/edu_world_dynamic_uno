@@ -781,7 +781,7 @@ export default {
             {
                 name: "NewsEvents",
                 label: "News & Events",
-                path: "/admin/manage-news-events",
+                path: "/admin/manage-news-events-section",
                 icon: "news-events",
             },
             {

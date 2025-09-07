@@ -12,6 +12,7 @@ use App\Http\Controllers\HeaderSectionController;
 use App\Http\Controllers\HeroSectionController;
 use App\Http\Controllers\LocationMapController;
 use App\Http\Controllers\LocationSectionController;
+use App\Http\Controllers\NewsEventsController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProgramSettingController;
 use App\Http\Controllers\SectionStyleController;
@@ -86,6 +87,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('footer-sections/{footerSection}', [FooterSectionController::class, 'update']);
         Route::delete('footer-sections/{footerSection}', [FooterSectionController::class, 'destroy']);
         Route::post('footer-sections/{footerSection}/activate', [FooterSectionController::class, 'activate']);
+        Route::get('/news-events', [NewsEventsController::class, 'index']);
+        Route::post('/news-events', [NewsEventsController::class, 'store']);
+        
+        // Specific action routes (must come before {id} routes)
+        Route::post('/news-events/update-order', [NewsEventsController::class, 'updateOrder']);
+        Route::get('/news-events-settings', [NewsEventsController::class, 'getSectionSettings']);
+        Route::post('/news-events-settings', [NewsEventsController::class, 'updateSectionSettings']);
+        
+        // Parameterized routes (must come after specific routes)
+        Route::get('/news-events/{id}', [NewsEventsController::class, 'show']);
+        Route::put('/news-events/{id}', [NewsEventsController::class, 'update']);
+        Route::post('/news-events/{id}', [NewsEventsController::class, 'update']); // For FormData with _method
+        Route::delete('/news-events/{id}', [NewsEventsController::class, 'destroy']);
+        Route::post('/news-events/{id}/toggle-status', [NewsEventsController::class, 'toggleStatus']);
     });
 });
 
@@ -108,3 +123,4 @@ Route::get('cta-sections/{ctaSection}', [CtaSectionController::class, 'show']);
 Route::get('admission-process/active', [AdmissionProcessController::class, 'getActive']);
 Route::get('/location-section/public', [LocationSectionController::class, 'getPublicData']);
 Route::get('/footer-sections/active', [FooterSectionController::class, 'getActive']);
+Route::get('/news-events/active', [NewsEventsController::class, 'getPublicNewsEvents']);
