@@ -194,89 +194,6 @@
                         </div>
                     </div>
 
-                    <!-- Background Gradients -->
-                    <div class="background-section">
-                        <h4 class="subsection-title">Background Gradients</h4>
-                        <div class="gradients-container">
-                            <div
-                                v-for="(
-                                    gradient, index
-                                ) in formData.background_gradients"
-                                :key="index"
-                                class="gradient-item"
-                            >
-                                <div
-                                    class="gradient-preview"
-                                    :style="{ background: gradient }"
-                                ></div>
-                                <input
-                                    v-model="
-                                        formData.background_gradients[index]
-                                    "
-                                    type="text"
-                                    class="form-input"
-                                    :placeholder="`linear-gradient(135deg, #ff7101, #102e4a)`"
-                                />
-                                <button
-                                    type="button"
-                                    @click="removeGradient(index)"
-                                    class="btn-icon btn-danger"
-                                    v-if="
-                                        formData.background_gradients.length > 1
-                                    "
-                                >
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <line x1="18" y1="6" x2="6" y2="18" />
-                                        <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            @click="addGradient"
-                            class="btn btn-outline btn-sm"
-                        >
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                            Add Gradient
-                        </button>
-
-                        <!-- Predefined Gradients -->
-                        <div class="predefined-gradients">
-                            <p class="form-label">Quick Gradients:</p>
-                            <div class="gradient-presets">
-                                <button
-                                    v-for="(
-                                        preset, index
-                                    ) in predefinedGradients"
-                                    :key="index"
-                                    type="button"
-                                    class="gradient-preset"
-                                    :style="{ background: preset }"
-                                    @click="addGradient(preset)"
-                                    :title="preset"
-                                ></button>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Slider Settings -->
                     <div class="background-section">
                         <h4 class="subsection-title">Slider Settings</h4>
@@ -843,18 +760,6 @@
                                             placeholder="translateY(-2px)"
                                         />
                                     </div>
-                                </div>
-
-                                <!-- Button Preview -->
-                                <div class="button-preview">
-                                    <span class="preview-label">Preview:</span>
-                                    <button
-                                        type="button"
-                                        class="preview-button"
-                                        :style="getButtonStyles(button)"
-                                    >
-                                        {{ button.text || "Button Text" }}
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1593,164 +1498,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Preview Tab -->
-                <div v-show="activeTab === 'preview'" class="tab-content">
-                    <h3 class="section-title">Live Preview</h3>
-
-                    <div class="preview-container">
-                        <div
-                            class="preview-hero-section"
-                            :style="getPreviewSectionStyles()"
-                        >
-                            <!-- Preview Background -->
-                            <div
-                                v-for="(
-                                    background, index
-                                ) in getPreviewBackgrounds()"
-                                :key="index"
-                                class="preview-background"
-                                :class="{ active: index === previewSlide }"
-                                :style="getPreviewBackgroundStyle(background)"
-                            ></div>
-
-                            <!-- Preview Overlay -->
-                            <div
-                                class="preview-overlay"
-                                :style="{
-                                    background:
-                                        formData.overlay_styles.background,
-                                    opacity: formData.overlay_styles.opacity,
-                                }"
-                            ></div>
-
-                            <!-- Preview Navigation -->
-                            <div
-                                v-if="formData.show_navigation"
-                                class="preview-nav"
-                                :style="getPreviewNavStyles()"
-                            >
-                                <div class="preview-nav-content">
-                                    <div class="preview-logo">
-                                        <img
-                                            v-if="
-                                                formData.navigation.logo
-                                                    .type === 'image' &&
-                                                (logoPreview ||
-                                                    formData.navigation.logo
-                                                        .image_path)
-                                            "
-                                            :src="getLogoUrl()"
-                                            alt="Logo"
-                                            style="max-height: 40px"
-                                        />
-                                        <span v-else>{{
-                                            formData.navigation.logo.text ||
-                                            "Edu World"
-                                        }}</span>
-                                    </div>
-                                    <div class="preview-menu">
-                                        <span
-                                            v-for="(
-                                                item, index
-                                            ) in formData.navigation.menu_items.slice(
-                                                0,
-                                                4
-                                            )"
-                                            :key="index"
-                                            class="preview-menu-item"
-                                        >
-                                            {{ item.title }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Preview Content -->
-                            <div
-                                class="preview-hero-content"
-                                :style="getPreviewContentStyles()"
-                            >
-                                <div class="preview-hero-text">
-                                    <h2
-                                        class="preview-title"
-                                        :style="getPreviewTitleStyles()"
-                                    >
-                                        {{ formData.title || "Welcome To" }}
-                                        <span
-                                            v-if="formData.title_highlight"
-                                            class="preview-title-highlight"
-                                            :style="{
-                                                color: formData.text_styles
-                                                    .title_highlight.color,
-                                            }"
-                                        >
-                                            {{ formData.title_highlight }}
-                                        </span>
-                                    </h2>
-                                    <h3
-                                        v-if="formData.subtitle"
-                                        class="preview-subtitle"
-                                        :style="getPreviewSubtitleStyles()"
-                                    >
-                                        {{ formData.subtitle }}
-                                    </h3>
-                                    <h1
-                                        v-if="formData.tagline"
-                                        class="preview-tagline"
-                                        :style="getPreviewTaglineStyles()"
-                                    >
-                                        {{ formData.tagline }}
-                                    </h1>
-                                    <div
-                                        v-if="
-                                            formData.cta_buttons &&
-                                            formData.cta_buttons.length
-                                        "
-                                        class="preview-buttons"
-                                    >
-                                        <span
-                                            v-for="(
-                                                button, index
-                                            ) in formData.cta_buttons"
-                                            :key="index"
-                                            class="preview-btn"
-                                            :style="getButtonStyles(button)"
-                                        >
-                                            {{ button.text }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Preview Controls -->
-                    <div class="preview-controls">
-                        <div class="preview-info">
-                            <p>
-                                <strong>Preview Note:</strong> This shows how
-                                your hero section will look. Some effects like
-                                animations and parallax may not display in
-                                preview.
-                            </p>
-                        </div>
-                        <div class="preview-actions">
-                            <button
-                                v-if="
-                                    formData.enable_slider &&
-                                    getPreviewBackgrounds().length > 1
-                                "
-                                type="button"
-                                @click="togglePreviewSlider"
-                                class="btn btn-outline btn-sm"
-                            >
-                                {{ previewSliderActive ? "Pause" : "Play" }}
-                                Slider
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Form Actions -->
@@ -1805,26 +1552,24 @@ export default {
             formData: {
                 section_name: "",
                 title: "Welcome To",
-                title_highlight: "Edu World",
-                subtitle: "A Complete ERP System",
+                title_highlight: "Your Brand",
+                subtitle: "A Complete Solution",
                 tagline:
-                    "A complete system for educational institution management.",
+                    "Your perfect tagline goes here to describe your amazing service.",
                 background_images: [],
                 background_gradients: [
                     "linear-gradient(135deg, #ff7101, #102e4a)",
                     "linear-gradient(135deg, #20bf6b, #102e4a)",
                     "linear-gradient(135deg, #f7b731, #102e4a)",
-                    "linear-gradient(135deg, #102e4a, #030811)",
-                    "linear-gradient(135deg, #d35b00, #102e4a)",
                 ],
                 slider_interval: 3500,
                 enable_slider: true,
                 cta_buttons: [
                     {
-                        text: "Apply now",
-                        url: "#apply",
-                        target: "_self",
+                        text: "Get Started",
+                        url: "#",
                         type: "primary",
+                        target: "_self",
                         styles: {
                             background: "#20bf6b",
                             color: "#fff",
@@ -1840,10 +1585,10 @@ export default {
                         },
                     },
                     {
-                        text: "Learn more",
-                        url: "#learn",
-                        target: "_self",
+                        text: "Learn More",
+                        url: "#",
                         type: "secondary",
+                        target: "_self",
                         styles: {
                             background: "transparent",
                             color: "#ff7101",
@@ -1862,29 +1607,13 @@ export default {
                 show_navigation: true,
                 navigation: {
                     logo: {
-                        type: "image",
-                        image_path: "",
-                        text: "Edu World",
-                        url: "#",
+                        type: "text",
+                        text: "Your Brand",
+                        url: "/",
                         alt: "Logo",
+                        image_path: "",
                     },
-                    menu_items: [
-                        {
-                            title: "Home",
-                            url: "#",
-                            sub_items: [],
-                            target: "_self",
-                        },
-                        {
-                            title: "About Us",
-                            url: "#",
-                            sub_items: [
-                                { text: "Our Story", url: "#story" },
-                                { text: "Mission & Vision", url: "#mission" },
-                            ],
-                            target: "_self",
-                        },
-                    ],
+                    menu_items: [],
                 },
                 text_styles: {
                     title: {
@@ -1967,7 +1696,6 @@ export default {
                 { key: "layout", label: "Layout" },
                 { key: "navigation", label: "Navigation" },
                 { key: "advanced", label: "Advanced" },
-                { key: "preview", label: "Preview" },
             ],
         };
     },
@@ -1980,26 +1708,7 @@ export default {
         heroSection: {
             handler(newHeroSection) {
                 if (newHeroSection && Object.keys(newHeroSection).length > 0) {
-                    this.formData = { ...this.formData, ...newHeroSection };
-
-                    // Ensure button structures are properly initialized
-                    if (this.formData.cta_buttons) {
-                        this.formData.cta_buttons =
-                            this.formData.cta_buttons.map((button) => ({
-                                ...button,
-                                styles: button.styles || {},
-                                hover_styles: button.hover_styles || {},
-                            }));
-                    }
-
-                    // Convert meta_tags array to string for editing
-                    if (
-                        this.formData.meta_tags &&
-                        Array.isArray(this.formData.meta_tags)
-                    ) {
-                        this.metaTagsString =
-                            this.formData.meta_tags.join(", ");
-                    }
+                    this.initializeFormData(newHeroSection);
                 }
             },
             immediate: true,
@@ -2034,18 +1743,96 @@ export default {
         this.stopPreviewSlider();
     },
     methods: {
+        initializeFormData(heroSection) {
+            // Deep merge the hero section data with default form data
+            this.formData = this.deepMerge(this.formData, heroSection);
+            
+            // Ensure button structures are properly initialized
+            if (this.formData.cta_buttons) {
+                this.formData.cta_buttons = this.formData.cta_buttons.map((button) => ({
+                    text: button.text || "Button",
+                    url: button.url || "#",
+                    type: button.type || "primary",
+                    target: button.target || "_self",
+                    styles: {
+                        background: "#20bf6b",
+                        color: "#fff",
+                        border: "2px solid #20bf6b",
+                        borderRadius: "6px",
+                        padding: "10px 28px",
+                        fontWeight: "500",
+                        ...button.styles
+                    },
+                    hover_styles: {
+                        background: "transparent",
+                        color: "#20bf6b",
+                        transform: "translateY(-2px)",
+                        ...button.hover_styles
+                    },
+                }));
+            }
+
+            // Convert meta_tags array to string for editing
+            if (this.formData.meta_tags && Array.isArray(this.formData.meta_tags)) {
+                this.metaTagsString = this.formData.meta_tags.join(", ");
+            }
+
+            // Ensure navigation structure is correct
+            if (!this.formData.navigation) {
+                this.formData.navigation = { logo: {}, menu_items: [] };
+            }
+            if (!this.formData.navigation.logo) {
+                this.formData.navigation.logo = {
+                    type: "text",
+                    text: "Your Brand",
+                    url: "/",
+                    alt: "Logo",
+                    image_path: ""
+                };
+            }
+            if (!this.formData.navigation.menu_items) {
+                this.formData.navigation.menu_items = [];
+            }
+        },
+
+        deepMerge(target, source) {
+            const result = { ...target };
+            for (const key in source) {
+                if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                    result[key] = this.deepMerge(target[key] || {}, source[key]);
+                } else {
+                    result[key] = source[key];
+                }
+            }
+            return result;
+        },
+
         handleSubmit() {
+            if (this.saving) return;
+            
             this.saving = true;
 
             const formData = new FormData();
 
-            // Add all form fields
+            // Add all form fields as JSON strings for Laravel to parse
+            const jsonFields = [
+                'background_gradients',
+                'cta_buttons', 
+                'text_styles',
+                'overlay_styles', 
+                'section_styles',
+                'navigation',
+                'nav_styles',
+                'advanced_settings',
+                'meta_tags'
+            ];
+
             Object.keys(this.formData).forEach((key) => {
                 const value = this.formData[key];
-                if (typeof value === "object" && value !== null) {
+                if (jsonFields.includes(key) && (typeof value === 'object' && value !== null)) {
                     formData.append(key, JSON.stringify(value));
-                } else {
-                    formData.append(key, value || "");
+                } else if (value !== null && value !== undefined) {
+                    formData.append(key, value);
                 }
             });
 
@@ -2056,8 +1843,8 @@ export default {
 
             // Add background files if uploaded
             if (this.backgroundFiles.length > 0) {
-                this.backgroundFiles.forEach((file, index) => {
-                    formData.append(`background_images[${index}]`, file);
+                this.backgroundFiles.forEach((file) => {
+                    formData.append("background_images[]", file);
                 });
             }
 
@@ -2079,19 +1866,14 @@ export default {
                 return this.logoPreview;
             }
 
-            // Handle public folder path correctly
-            if (this.formData.navigation.logo.image_path) {
+            if (this.formData.navigation?.logo?.image_path) {
+                const imagePath = this.formData.navigation.logo.image_path;
                 // If it's already a full URL, return as is
-                if (
-                    this.formData.navigation.logo.image_path.startsWith(
-                        "http"
-                    ) ||
-                    this.formData.navigation.logo.image_path.startsWith("/")
-                ) {
-                    return this.formData.navigation.logo.image_path;
+                if (imagePath.startsWith("http") || imagePath.startsWith("/")) {
+                    return imagePath;
                 }
                 // Otherwise, assume it's in public folder
-                return "/" + this.formData.navigation.logo.image_path;
+                return "/" + imagePath;
             }
 
             return "";
@@ -2112,10 +1894,7 @@ export default {
 
         processBackgroundFile(file) {
             if (file.size > 2 * 1024 * 1024) {
-                this.$emit(
-                    "error",
-                    "Background file size must be less than 2MB"
-                );
+                this.$emit("error", "Background file size must be less than 2MB");
                 return;
             }
 
@@ -2124,13 +1903,18 @@ export default {
             // Create preview URL
             const reader = new FileReader();
             reader.onload = (e) => {
+                if (!this.formData.background_images) {
+                    this.formData.background_images = [];
+                }
                 this.formData.background_images.push(e.target.result);
             };
             reader.readAsDataURL(file);
         },
 
         removeBackgroundImage(index) {
-            this.formData.background_images.splice(index, 1);
+            if (this.formData.background_images) {
+                this.formData.background_images.splice(index, 1);
+            }
             if (this.backgroundFiles[index]) {
                 this.backgroundFiles.splice(index, 1);
             }
@@ -2138,13 +1922,15 @@ export default {
 
         // Gradient methods
         addGradient(preset = null) {
-            const newGradient =
-                preset || "linear-gradient(135deg, #ff7101, #102e4a)";
+            const newGradient = preset || "linear-gradient(135deg, #ff7101, #102e4a)";
+            if (!this.formData.background_gradients) {
+                this.formData.background_gradients = [];
+            }
             this.formData.background_gradients.push(newGradient);
         },
 
         removeGradient(index) {
-            if (this.formData.background_gradients.length > 1) {
+            if (this.formData.background_gradients && this.formData.background_gradients.length > 1) {
                 this.formData.background_gradients.splice(index, 1);
             }
         },
@@ -2181,6 +1967,10 @@ export default {
 
         // Button methods
         addButton() {
+            if (!this.formData.cta_buttons) {
+                this.formData.cta_buttons = [];
+            }
+            
             this.formData.cta_buttons.push({
                 text: "New Button",
                 url: "#",
@@ -2203,7 +1993,7 @@ export default {
         },
 
         removeButton(index) {
-            if (this.formData.cta_buttons.length > 1) {
+            if (this.formData.cta_buttons && this.formData.cta_buttons.length > 1) {
                 this.formData.cta_buttons.splice(index, 1);
             }
         },
@@ -2225,6 +2015,10 @@ export default {
 
         // Menu methods
         addMenuItem() {
+            if (!this.formData.navigation.menu_items) {
+                this.formData.navigation.menu_items = [];
+            }
+            
             this.formData.navigation.menu_items.push({
                 title: "Menu Item",
                 url: "#",
@@ -2234,7 +2028,9 @@ export default {
         },
 
         removeMenuItem(index) {
-            this.formData.navigation.menu_items.splice(index, 1);
+            if (this.formData.navigation.menu_items) {
+                this.formData.navigation.menu_items.splice(index, 1);
+            }
         },
 
         addSubMenuItem(parentIndex) {
@@ -2252,10 +2048,12 @@ export default {
         },
 
         removeSubMenuItem(parentIndex, subIndex) {
-            this.formData.navigation.menu_items[parentIndex].sub_items.splice(
-                subIndex,
-                1
-            );
+            if (this.formData.navigation.menu_items[parentIndex].sub_items) {
+                this.formData.navigation.menu_items[parentIndex].sub_items.splice(
+                    subIndex,
+                    1
+                );
+            }
         },
 
         // Preview methods
@@ -2883,24 +2681,6 @@ export default {
     border-top: 1px solid #e5e7eb;
 }
 
-.button-preview {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.preview-button {
-    font-weight: 500;
-    border: none;
-    cursor: default;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
 .menu-items-list {
     display: flex;
     flex-direction: column;
@@ -2952,139 +2732,11 @@ export default {
     margin-top: 12px;
     border-radius: 6px;
     overflow: hidden;
+    
 }
 
-.preview-overlay {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 500;
-}
-
-.preview-container {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 16px;
-}
-
-.preview-hero-section {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    overflow: hidden;
-}
-
-.preview-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 1s ease;
-}
-
-.preview-background.active {
-    opacity: 1;
-}
-
-.preview-nav {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
-    padding: 16px 20px;
-}
-
-.preview-nav-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.preview-logo {
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: white;
-}
-
-.preview-menu {
-    display: flex;
-    gap: 20px;
-}
-
-.preview-menu-item {
-    color: white;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.preview-hero-text {
-    color: white;
-    text-align: center;
-}
-
-.preview-title {
-    font-size: 1.9rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.preview-title-highlight {
-    color: #ff7101;
-}
-
-.preview-subtitle {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: #21bf6b;
-}
-
-.preview-tagline {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 18px;
-    color: #f7b731;
-    line-height: 1.05;
-}
-
-.preview-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 24px;
-}
-
-.preview-btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.preview-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background: #f9fafb;
-    border-top: 1px solid #e5e7eb;
-}
-
-.preview-info {
-    flex: 1;
-    color: #6b7280;
-    font-size: 0.875rem;
+.preview-overlay{
+    padding: 10px;
 }
 
 .form-actions {

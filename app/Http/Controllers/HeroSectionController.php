@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class HeroSectionController extends Controller
 {
@@ -16,7 +17,7 @@ class HeroSectionController extends Controller
     public function getActive(): JsonResponse
     {
         try {
-            $heroSection = HeroSection::getActive();
+            $heroSection = HeroSection::where('is_active', true)->first();
 
             if (!$heroSection) {
                 return response()->json([
@@ -30,6 +31,7 @@ class HeroSectionController extends Controller
                 'data' => $heroSection
             ]);
         } catch (\Exception $e) {
+            Log::error('Error fetching active hero section: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching hero section: ' . $e->getMessage()
@@ -50,6 +52,7 @@ class HeroSectionController extends Controller
                 'data' => $heroSections
             ]);
         } catch (\Exception $e) {
+            Log::error('Error fetching hero sections: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching hero sections: ' . $e->getMessage()
@@ -83,46 +86,13 @@ class HeroSectionController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            Log::info('Creating hero section with data: ', $request->all());
+
+            // Validate the request
             $validated = $this->validateHeroSection($request);
 
-            // Handle background image uploads
-            $backgroundImages = [];
-            
-            // Handle existing background images (URLs)
-            if ($request->has('background_images') && is_string($request->input('background_images'))) {
-                $existingImages = json_decode($request->input('background_images'), true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($existingImages)) {
-                    $backgroundImages = array_merge($backgroundImages, $existingImages);
-                }
-            }
-
-            // Handle new file uploads
-            if ($request->hasFile('background_files')) {
-                foreach ($request->file('background_files') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('uploads/slides', $filename, 'public');
-                    $backgroundImages[] = '/storage/' . $path;
-                }
-            }
-
-            if (!empty($backgroundImages)) {
-                $validated['background_images'] = $backgroundImages;
-            }
-
-            // Handle logo upload
-            if ($request->hasFile('logo_image')) {
-                $logoFile = $request->file('logo_image');
-                $filename = time() . '_logo_' . uniqid() . '.' . $logoFile->getClientOriginalExtension();
-                $path = $logoFile->storeAs('uploads/image', $filename, 'public');
-
-                // Update navigation logo path
-                $navigation = $validated['navigation'] ?? [];
-                if (!isset($navigation['logo'])) {
-                    $navigation['logo'] = [];
-                }
-                $navigation['logo']['image_path'] = '/storage/' . $path;
-                $validated['navigation'] = $navigation;
-            }
+            // Handle file uploads first
+            $validated = $this->handleFileUploads($request, $validated);
 
             // If this is set as active, deactivate others
             if ($validated['is_active'] ?? false) {
@@ -137,12 +107,14 @@ class HeroSectionController extends Controller
                 'data' => $heroSection
             ], 201);
         } catch (ValidationException $e) {
+            Log::error('Validation error creating hero section: ', $e->errors());
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error creating hero section: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating hero section: ' . $e->getMessage()
@@ -156,76 +128,15 @@ class HeroSectionController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         try {
+            Log::info('Updating hero section ' . $id . ' with data: ', $request->all());
+
             $heroSection = HeroSection::findOrFail($id);
 
-            // Handle boolean values properly
-            $request->merge([
-                'is_active' => $request->has('is_active') ? filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN) : false,
-                'enable_slider' => $request->has('enable_slider') ? filter_var($request->input('enable_slider'), FILTER_VALIDATE_BOOLEAN) : false,
-                'show_navigation' => $request->has('show_navigation') ? filter_var($request->input('show_navigation'), FILTER_VALIDATE_BOOLEAN) : false,
-            ]);
-
+            // Validate the request
             $validated = $this->validateHeroSection($request, $id);
 
-            // Handle background image uploads
-            $backgroundImages = [];
-            
-            // Keep existing images if no new ones are uploaded
-            if (!$request->hasFile('background_files')) {
-                $backgroundImages = $heroSection->background_images ?? [];
-            }
-
-            // Handle existing background images (URLs) from form
-            if ($request->has('background_images') && is_string($request->input('background_images'))) {
-                $existingImages = json_decode($request->input('background_images'), true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($existingImages)) {
-                    $backgroundImages = $existingImages;
-                }
-            }
-
-            // Handle new file uploads
-            if ($request->hasFile('background_files')) {
-                // Delete old background images if uploading new ones
-                if ($heroSection->background_images) {
-                    foreach ($heroSection->background_images as $oldImage) {
-                        if (strpos($oldImage, '/storage/') === 0) {
-                            Storage::disk('public')->delete(str_replace('/storage/', '', $oldImage));
-                        }
-                    }
-                }
-
-                $backgroundImages = [];
-                foreach ($request->file('background_files') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('uploads/slides', $filename, 'public');
-                    $backgroundImages[] = '/storage/' . $path;
-                }
-            }
-
-            if (!empty($backgroundImages)) {
-                $validated['background_images'] = $backgroundImages;
-            }
-
-            // Handle logo upload
-            if ($request->hasFile('logo_image')) {
-                // Delete old logo
-                $oldNavigation = $heroSection->navigation ?? [];
-                if (isset($oldNavigation['logo']['image_path']) && strpos($oldNavigation['logo']['image_path'], '/storage/') === 0) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $oldNavigation['logo']['image_path']));
-                }
-
-                $logoFile = $request->file('logo_image');
-                $filename = time() . '_logo_' . uniqid() . '.' . $logoFile->getClientOriginalExtension();
-                $path = $logoFile->storeAs('uploads/image', $filename, 'public');
-
-                // Update navigation logo path
-                $navigation = $validated['navigation'] ?? [];
-                if (!isset($navigation['logo'])) {
-                    $navigation['logo'] = [];
-                }
-                $navigation['logo']['image_path'] = '/storage/' . $path;
-                $validated['navigation'] = $navigation;
-            }
+            // Handle file uploads
+            $validated = $this->handleFileUploads($request, $validated, $heroSection);
 
             // If this is set as active, deactivate others
             if ($validated['is_active'] ?? false) {
@@ -242,12 +153,14 @@ class HeroSectionController extends Controller
                 'data' => $heroSection->fresh()
             ]);
         } catch (ValidationException $e) {
+            Log::error('Validation error updating hero section: ', $e->errors());
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error updating hero section: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating hero section: ' . $e->getMessage()
@@ -263,8 +176,9 @@ class HeroSectionController extends Controller
         try {
             $heroSection = HeroSection::findOrFail($id);
 
-            // Don't allow deleting the active section if it's the only one
-            if ($heroSection->is_active && HeroSection::count() === 1) {
+            // Don't allow deleting if it's the only section and it's active
+            $totalSections = HeroSection::count();
+            if ($heroSection->is_active && $totalSections === 1) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot delete the only active hero section'
@@ -272,19 +186,7 @@ class HeroSectionController extends Controller
             }
 
             // Delete associated files
-            if ($heroSection->background_images) {
-                foreach ($heroSection->background_images as $image) {
-                    if (strpos($image, '/storage/') === 0) {
-                        Storage::disk('public')->delete(str_replace('/storage/', '', $image));
-                    }
-                }
-            }
-
-            // Delete logo if exists
-            $navigation = $heroSection->navigation ?? [];
-            if (isset($navigation['logo']['image_path']) && strpos($navigation['logo']['image_path'], '/storage/') === 0) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $navigation['logo']['image_path']));
-            }
+            $this->deleteAssociatedFiles($heroSection);
 
             $heroSection->delete();
 
@@ -293,6 +195,7 @@ class HeroSectionController extends Controller
                 'message' => 'Hero section deleted successfully'
             ]);
         } catch (\Exception $e) {
+            Log::error('Error deleting hero section: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error deleting hero section: ' . $e->getMessage()
@@ -301,61 +204,42 @@ class HeroSectionController extends Controller
     }
 
     /**
-     * Set hero section as active
+     * Toggle hero section active status
      */
-    public function setActive($id): JsonResponse
+    public function setActive(Request $request, $id): JsonResponse
     {
         try {
             $heroSection = HeroSection::findOrFail($id);
-            $heroSection->setAsActive();
+
+            // Get current status and toggle it
+            $newStatus = !$heroSection->is_active;
+
+            if ($newStatus) {
+                // If setting as active, deactivate all others first
+                HeroSection::where('id', '!=', $id)->update(['is_active' => !$newStatus]);
+                $heroSection->update(['is_active' => $newStatus]);
+            } else {
+                // Check if this is the only active section
+                $activeSections = HeroSection::where('is_active', true)->count();
+                if ($activeSections <= 1) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'At least one hero section must remain active'
+                    ], 422);
+                }
+                $heroSection->update(['is_active' => false]);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Hero section set as active successfully',
+                'message' => 'Hero section status updated successfully',
                 'data' => $heroSection->fresh()
             ]);
         } catch (\Exception $e) {
+            Log::error('Error toggling hero section status: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error setting hero section as active: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Upload background images
-     */
-    public function uploadBackgroundImage(Request $request): JsonResponse
-    {
-        try {
-            $request->validate([
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'hero_section_id' => 'nullable|exists:hero_sections,id'
-            ]);
-
-            $image = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('uploads/slides', $filename, 'public');
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Image uploaded successfully',
-                'data' => [
-                    'url' => '/storage/' . $path,
-                    'filename' => $filename,
-                    'path' => $path
-                ]
-            ]);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error uploading image: ' . $e->getMessage()
+                'message' => 'Error updating hero section status: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -385,6 +269,7 @@ class HeroSectionController extends Controller
                 'data' => $duplicate
             ], 201);
         } catch (\Exception $e) {
+            Log::error('Error duplicating hero section: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error duplicating hero section: ' . $e->getMessage()
@@ -393,38 +278,122 @@ class HeroSectionController extends Controller
     }
 
     /**
+     * Handle file uploads for hero section
+     */
+    private function handleFileUploads(Request $request, array $validated, HeroSection $heroSection = null): array
+    {
+        // Handle background images
+        $backgroundImages = [];
+
+        // Keep existing background images if updating and no new files
+        if ($heroSection && !$request->hasFile('background_images')) {
+            $backgroundImages = $heroSection->background_images ?? [];
+        }
+
+        // Handle new background image uploads
+        if ($request->hasFile('background_images')) {
+            // Delete old images if updating
+            if ($heroSection && $heroSection->background_images) {
+                foreach ($heroSection->background_images as $oldImage) {
+                    $this->deleteFile($oldImage);
+                }
+            }
+
+            $backgroundImages = [];
+            $files = is_array($request->file('background_images'))
+                ? $request->file('background_images')
+                : [$request->file('background_images')];
+
+            foreach ($files as $file) {
+                if ($file && $file->isValid()) {
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('uploads/slides', $filename, 'public');
+                    $backgroundImages[] = '/storage/' . $path;
+                }
+            }
+        }
+
+        if (!empty($backgroundImages)) {
+            $validated['background_images'] = $backgroundImages;
+        }
+
+        // Handle logo upload
+        if ($request->hasFile('logo_image')) {
+            // Delete old logo if updating
+            if ($heroSection) {
+                $oldNavigation = $heroSection->navigation ?? [];
+                if (isset($oldNavigation['logo']['image_path'])) {
+                    $this->deleteFile($oldNavigation['logo']['image_path']);
+                }
+            }
+
+            $logoFile = $request->file('logo_image');
+            if ($logoFile->isValid()) {
+                $filename = time() . '_logo_' . uniqid() . '.' . $logoFile->getClientOriginalExtension();
+                $path = $logoFile->storeAs('uploads/image', $filename, 'public');
+
+                // Update navigation logo path
+                $navigation = $validated['navigation'] ?? [];
+                if (!isset($navigation['logo'])) {
+                    $navigation['logo'] = [];
+                }
+                $navigation['logo']['image_path'] = '/storage/' . $path;
+                $validated['navigation'] = $navigation;
+            }
+        }
+
+        return $validated;
+    }
+
+    /**
+     * Delete a file from storage
+     */
+    private function deleteFile($filePath): void
+    {
+        if ($filePath && strpos($filePath, '/storage/') === 0) {
+            $relativePath = str_replace('/storage/', '', $filePath);
+            Storage::disk('public')->delete($relativePath);
+        }
+    }
+
+    /**
+     * Delete associated files for a hero section
+     */
+    private function deleteAssociatedFiles(HeroSection $heroSection): void
+    {
+        // Delete background images
+        if ($heroSection->background_images) {
+            foreach ($heroSection->background_images as $image) {
+                $this->deleteFile($image);
+            }
+        }
+
+        // Delete logo
+        $navigation = $heroSection->navigation ?? [];
+        if (isset($navigation['logo']['image_path'])) {
+            $this->deleteFile($navigation['logo']['image_path']);
+        }
+    }
+
+    /**
      * Validate hero section data
      */
     private function validateHeroSection(Request $request, $id = null): array
     {
-        $rules = [
-            'section_name' => 'required|string|max:255',
-            'is_active' => 'boolean',
-            'title' => 'nullable|string|max:255',
-            'title_highlight' => 'nullable|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'tagline' => 'nullable|string',
-            'background_images' => 'nullable|string', // This will be JSON string of URLs
-            'slider_interval' => 'nullable|integer|min:1000|max:10000',
-            'enable_slider' => 'boolean',
-            'cta_buttons' => 'nullable|string', // JSON string
-            'text_styles' => 'nullable|string', // JSON string
-            'overlay_styles' => 'nullable|string', // JSON string
-            'section_styles' => 'nullable|string', // JSON string
-            'navigation' => 'nullable|string', // JSON string
-            'show_navigation' => 'boolean',
-            'nav_styles' => 'nullable|string', // JSON string
-            'advanced_settings' => 'nullable|string', // JSON string
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string|max:500',
-            'meta_tags' => 'nullable|string', // JSON string
-            // File uploads - separate field names
-            'background_files.*' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'logo_image' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
-        ];
+        // Convert string booleans to actual booleans
+        $booleanFields = ['is_active', 'enable_slider', 'show_navigation'];
+        foreach ($booleanFields as $field) {
+            if ($request->has($field)) {
+                $value = $request->input($field);
+                if (is_string($value)) {
+                    $request->merge([$field => filter_var($value, FILTER_VALIDATE_BOOLEAN)]);
+                }
+            }
+        }
 
         // Parse JSON strings from form data
         $jsonFields = [
+            'background_gradients',
             'cta_buttons',
             'text_styles',
             'overlay_styles',
@@ -436,13 +405,42 @@ class HeroSectionController extends Controller
         ];
 
         foreach ($jsonFields as $field) {
-            if ($request->has($field) && is_string($request->input($field))) {
-                $decoded = json_decode($request->input($field), true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $request->merge([$field => $decoded]);
+            if ($request->has($field)) {
+                $value = $request->input($field);
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $request->merge([$field => $decoded]);
+                    }
                 }
             }
         }
+
+        $rules = [
+            'section_name' => 'required|string|max:255',
+            'is_active' => 'boolean',
+            'title' => 'nullable|string|max:255',
+            'title_highlight' => 'nullable|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'tagline' => 'nullable|string',
+            'background_gradients' => 'nullable|array',
+            'slider_interval' => 'nullable|integer|min:1000|max:15000',
+            'enable_slider' => 'boolean',
+            'cta_buttons' => 'nullable|array',
+            'text_styles' => 'nullable|array',
+            'overlay_styles' => 'nullable|array',
+            'section_styles' => 'nullable|array',
+            'navigation' => 'nullable|array',
+            'show_navigation' => 'boolean',
+            'nav_styles' => 'nullable|array',
+            'advanced_settings' => 'nullable|array',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_tags' => 'nullable|array',
+            // File uploads
+            'background_images.*' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'logo_image' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+        ];
 
         return $request->validate($rules);
     }

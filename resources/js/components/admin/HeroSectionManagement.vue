@@ -1,5 +1,30 @@
 <template>
     <div class="section-manager">
+        <!-- Toast Container -->
+        <div class="toast-container">
+            <div
+                v-for="toast in toasts"
+                :key="toast.id"
+                class="toast"
+                :class="'toast-' + toast.type"
+                @click="removeToast(toast.id)"
+            >
+                <div class="toast-icon">
+                    <span v-if="toast.type === 'success'">✓</span>
+                    <span v-else-if="toast.type === 'error'">✕</span>
+                    <span v-else-if="toast.type === 'warning'">⚠</span>
+                    <span v-else>ℹ</span>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">{{ toast.title }}</div>
+                    <div class="toast-message">{{ toast.message }}</div>
+                </div>
+                <button class="toast-close" @click.stop="removeToast(toast.id)">
+                    ×
+                </button>
+            </div>
+        </div>
+
         <!-- Page Header -->
         <div class="page-header">
             <div class="header-content">
@@ -51,38 +76,6 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
-        <div v-if="message.text" class="alert" :class="message.type">
-            <svg
-                v-if="message.type === 'success'"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <polyline points="9,11 12,14 22,4" />
-                <path
-                    d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
-                />
-            </svg>
-            <svg
-                v-else
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-            {{ message.text }}
-        </div>
-
         <!-- Hero Editor Modal -->
         <div
             v-if="showEditorModal"
@@ -107,7 +100,7 @@
                         :heroSection="currentHeroSection"
                         @save="saveHeroSection"
                         @cancel="closeEditor"
-                        @error="showMessage($event, 'error')"
+                        @error="showToast($event, 'error', 'Error')"
                     />
                 </div>
             </div>
@@ -138,10 +131,20 @@
             <div class="sections-list">
                 <div
                     v-for="heroSection in heroSections"
-                    :key="heroSection.id"
+                    :key="`hero-${heroSection.id}-${
+                        heroSection.updated_at || heroSection.created_at
+                    }`"
                     class="section-item"
                     :class="{ 'section-hidden': !heroSection.is_active }"
                 >
+                    <!-- Debug info - remove this after testing -->
+                    <div
+                        style="font-size: 10px; color: #999; margin-bottom: 5px"
+                    >
+                        ID: {{ heroSection.id }} | Updated:
+                        {{ heroSection.updated_at }}
+                    </div>
+
                     <div class="section-content">
                         <div class="section-info">
                             <div class="hero-preview-small">
@@ -196,9 +199,7 @@
                                     images
                                 </span>
                                 <span class="section-buttons">
-                                    {{
-                                        (heroSection.cta_buttons || []).length
-                                    }}
+                                    {{ (heroSection.cta_buttons || []).length }}
                                     buttons
                                 </span>
                                 <span
@@ -219,7 +220,9 @@
                                         @change="
                                             toggleHeroSectionActive(heroSection)
                                         "
-                                        :disabled="loading"
+                                        :disabled="
+                                            toggleLoading === heroSection.id
+                                        "
                                     />
                                     <span class="toggle-slider"></span>
                                 </label>
@@ -257,6 +260,7 @@
                                     @click="duplicateHeroSection(heroSection)"
                                     class="btn-icon"
                                     title="Duplicate"
+                                    :disabled="loading"
                                 >
                                     <svg
                                         width="16"
@@ -284,8 +288,9 @@
                                     class="btn-icon danger"
                                     title="Delete"
                                     :disabled="
-                                        heroSection.is_active &&
-                                        activeHeroSectionsCount === 1
+                                        loading ||
+                                        (heroSection.is_active &&
+                                            activeHeroSectionsCount === 1)
                                     "
                                 >
                                     <svg
@@ -356,10 +361,12 @@ export default {
         return {
             heroSections: [],
             loading: false,
-            message: { text: "", type: "" },
+            toggleLoading: null,
             showEditorModal: false,
             currentHeroSection: null,
             isEditing: false,
+            toasts: [],
+            toastCounter: 0,
         };
     },
     computed: {
@@ -377,67 +384,153 @@ export default {
             try {
                 const response = await axios.get("/admin/hero-sections");
                 if (response.data.success) {
-                    this.heroSections = response.data.data;
+                    // Force reactivity update
+                    this.heroSections = [];
+                    this.$nextTick(() => {
+                        this.heroSections = response.data.data;
+                    });
+                } else {
+                    throw new Error(
+                        response.data.message || "Failed to fetch hero sections"
+                    );
                 }
             } catch (error) {
-                this.showMessage("Failed to fetch hero sections", "error");
                 console.error("Error fetching hero sections:", error);
+                this.showToast(
+                    error.response?.data?.message ||
+                        "Failed to fetch hero sections",
+                    "error",
+                    "Error"
+                );
             } finally {
                 this.loading = false;
             }
         },
 
-        showMessage(text, type = "success") {
-            this.message = { text, type };
+        showToast(message, type = "success", title = "") {
+            const toast = {
+                id: ++this.toastCounter,
+                message,
+                type,
+                title:
+                    title ||
+                    (type === "success"
+                        ? "Success"
+                        : type === "error"
+                        ? "Error"
+                        : "Info"),
+            };
+
+            this.toasts.push(toast);
+
+            // Auto remove after 5 seconds
             setTimeout(() => {
-                this.message = { text: "", type: "" };
+                this.removeToast(toast.id);
             }, 5000);
         },
 
+        removeToast(id) {
+            const index = this.toasts.findIndex((t) => t.id === id);
+            if (index > -1) {
+                this.toasts.splice(index, 1);
+            }
+        },
+
         async toggleHeroSectionActive(heroSection) {
+            if (this.toggleLoading === heroSection.id) return;
+
             try {
-                this.loading = true;
+                this.toggleLoading = heroSection.id;
+
                 const response = await axios.patch(
                     `/admin/hero-sections/${heroSection.id}/set-active`
                 );
+
                 if (response.data.success) {
-                    this.showMessage(
+                    this.showToast(
                         "Hero section status updated successfully",
                         "success"
                     );
-                    this.fetchHeroSections(); // Refresh to get updated data
+
+                    // Force reactivity by recreating the array
+                    const updatedSection = response.data.data;
+                    const newSections = [...this.heroSections];
+                    const index = newSections.findIndex(
+                        (s) => s.id === updatedSection.id
+                    );
+
+                    if (index !== -1) {
+                        // Update the specific section
+                        newSections[index] = { ...updatedSection };
+
+                        // If this section was activated, deactivate others
+                        if (updatedSection.is_active) {
+                            newSections.forEach((section, idx) => {
+                                if (idx !== index) {
+                                    section.is_active = false;
+                                }
+                            });
+                        }
+
+                        // Replace the entire array to trigger reactivity
+                        this.heroSections = newSections;
+                    }
+                } else {
+                    throw new Error(
+                        response.data.message || "Failed to update status"
+                    );
                 }
             } catch (error) {
-                heroSection.is_active = !heroSection.is_active; // Revert on error
-                this.showMessage(
-                    "Failed to update hero section status",
+                console.error("Error toggling hero section:", error);
+                this.showToast(
+                    error.response?.data?.message ||
+                        "Failed to update hero section status",
                     "error"
                 );
-                console.error("Error toggling hero section:", error);
             } finally {
-                this.loading = false;
+                this.toggleLoading = null;
             }
         },
 
         async deleteHeroSection(id) {
-            if (!confirm("Are you sure you want to delete this hero section?"))
-                return;
+            const section = this.heroSections.find((s) => s.id === id);
+            const confirmMessage =
+                section &&
+                section.is_active &&
+                this.activeHeroSectionsCount === 1
+                    ? "This is the only active hero section. Are you sure you want to delete it?"
+                    : "Are you sure you want to delete this hero section?";
+
+            if (!confirm(confirmMessage)) return;
 
             try {
                 this.loading = true;
+
                 const response = await axios.delete(
                     `/admin/hero-sections/${id}`
                 );
+
                 if (response.data.success) {
-                    this.showMessage(
+                    this.showToast(
                         "Hero section deleted successfully",
                         "success"
                     );
-                    this.fetchHeroSections();
+                    // Force reactivity update
+                    this.heroSections = this.heroSections.filter(
+                        (s) => s.id !== id
+                    );
+                } else {
+                    throw new Error(
+                        response.data.message || "Failed to delete hero section"
+                    );
                 }
             } catch (error) {
-                this.showMessage("Failed to delete hero section", "error");
                 console.error("Error deleting hero section:", error);
+                this.showToast(
+                    error.response?.data?.message ||
+                        "Failed to delete hero section",
+                    "error"
+                );
             } finally {
                 this.loading = false;
             }
@@ -465,12 +558,38 @@ export default {
                         url: "#",
                         type: "primary",
                         target: "_self",
+                        styles: {
+                            background: "#20bf6b",
+                            color: "#fff",
+                            border: "2px solid #20bf6b",
+                            borderRadius: "6px",
+                            padding: "10px 28px",
+                            fontWeight: "500",
+                        },
+                        hover_styles: {
+                            background: "transparent",
+                            color: "#20bf6b",
+                            transform: "translateY(-2px)",
+                        },
                     },
                     {
                         text: "Learn More",
                         url: "#",
                         type: "secondary",
                         target: "_self",
+                        styles: {
+                            background: "transparent",
+                            color: "#ff7101",
+                            border: "2px solid #ff7101",
+                            borderRadius: "6px",
+                            padding: "10px 28px",
+                            fontWeight: "500",
+                        },
+                        hover_styles: {
+                            background: "#ff7101",
+                            color: "#fff",
+                            transform: "translateY(-2px)",
+                        },
                     },
                 ],
                 show_navigation: true,
@@ -485,26 +604,26 @@ export default {
                 },
                 text_styles: {
                     title: {
-                        font_size: "1.9rem",
-                        font_weight: "700",
+                        fontSize: "1.9rem",
+                        fontWeight: "700",
                         color: "#ffffff",
-                        margin_bottom: "8px",
+                        marginBottom: "8px",
                     },
                     title_highlight: {
                         color: "#ff7101",
                     },
                     subtitle: {
-                        font_size: "1.5rem",
-                        font_weight: "600",
+                        fontSize: "1.5rem",
+                        fontWeight: "600",
                         color: "#21bf6b",
-                        margin_bottom: "12px",
+                        marginBottom: "12px",
                     },
                     tagline: {
-                        font_size: "2.2rem",
-                        font_weight: "800",
+                        fontSize: "2.2rem",
+                        fontWeight: "800",
                         color: "#f7b731",
-                        line_height: "1.05",
-                        margin_bottom: "18px",
+                        lineHeight: "1.05",
+                        marginBottom: "18px",
                     },
                 },
                 overlay_styles: {
@@ -512,14 +631,31 @@ export default {
                         "linear-gradient(135deg, rgba(6, 6, 7, 0.8), rgba(0, 30, 60, 0.7))",
                 },
                 section_styles: {
-                    min_height: "80vh",
+                    minHeight: "80vh",
                     padding: "110px 20px 80px",
                 },
                 nav_styles: {
                     background: "transparent",
                     scrolled_background: "rgba(0, 30, 60, 0.95)",
-                    padding: "0 20px",
+                    link_color: "#fff",
+                    link_hover_color: "#d35b00",
+                    dropdown_background: "#fff",
+                    dropdown_border_color: "#ff7101",
+                    mobile_background: "rgba(0, 30, 60, 0.95)",
                 },
+                advanced_settings: {
+                    enable_animations: true,
+                    transition_duration: "1s",
+                    enable_zoom_effect: true,
+                    zoom_duration: "8s",
+                    mobile_responsive: true,
+                    lazy_load_images: true,
+                    scroll_behavior: "smooth",
+                    preload_images: true,
+                },
+                meta_title: "",
+                meta_description: "",
+                meta_tags: [],
                 is_active: false,
             };
             this.isEditing = false;
@@ -527,33 +663,58 @@ export default {
         },
 
         editHeroSection(heroSection) {
-            this.currentHeroSection = { ...heroSection };
+            this.currentHeroSection = JSON.parse(JSON.stringify(heroSection));
             this.isEditing = true;
             this.showEditorModal = true;
         },
 
         async duplicateHeroSection(heroSection) {
+            if (this.loading) return;
+
             try {
                 this.loading = true;
+
                 const response = await axios.post(
                     `/admin/hero-sections/${heroSection.id}/duplicate`
                 );
+
                 if (response.data.success) {
-                    this.showMessage(
+                    this.showToast(
                         "Hero section duplicated successfully",
                         "success"
                     );
-                    this.fetchHeroSections();
+
+                    // Check if the section already exists to prevent duplicates
+                    const newSection = response.data.data;
+                    const existingIndex = this.heroSections.findIndex(
+                        (s) => s.id === newSection.id
+                    );
+
+                    if (existingIndex === -1) {
+                        // Add new section at the beginning only if it doesn't exist
+                        this.heroSections.unshift({ ...newSection });
+                    }
+                } else {
+                    throw new Error(
+                        response.data.message ||
+                            "Failed to duplicate hero section"
+                    );
                 }
             } catch (error) {
-                this.showMessage("Failed to duplicate hero section", "error");
                 console.error("Error duplicating hero section:", error);
+                this.showToast(
+                    error.response?.data?.message ||
+                        "Failed to duplicate hero section",
+                    "error"
+                );
             } finally {
                 this.loading = false;
             }
         },
 
         async saveHeroSection(formData) {
+            if (this.loading) return;
+
             try {
                 this.loading = true;
                 let response;
@@ -581,14 +742,55 @@ export default {
                 }
 
                 if (response.data.success) {
-                    this.showMessage(
-                        `Hero section ${
-                            this.isEditing ? "updated" : "created"
-                        } successfully`,
+                    const actionText = this.isEditing ? "updated" : "created";
+                    this.showToast(
+                        `Hero section ${actionText} successfully`,
                         "success"
                     );
                     this.closeEditor();
-                    this.fetchHeroSections();
+
+                    // Force reactivity update
+                    if (this.isEditing) {
+                        const newSections = [...this.heroSections];
+                        const index = newSections.findIndex(
+                            (s) => s.id === response.data.data.id
+                        );
+                        if (index !== -1) {
+                            newSections[index] = { ...response.data.data };
+                        }
+
+                        // Handle active status updates
+                        if (response.data.data.is_active) {
+                            newSections.forEach((section, idx) => {
+                                if (idx !== index) {
+                                    section.is_active = false;
+                                }
+                            });
+                        }
+
+                        this.heroSections = newSections;
+                    } else {
+                        // For new sections, add to beginning
+                        const newSections = [
+                            response.data.data,
+                            ...this.heroSections,
+                        ];
+
+                        // Handle active status
+                        if (response.data.data.is_active) {
+                            newSections.forEach((section, idx) => {
+                                if (idx !== 0) {
+                                    section.is_active = false;
+                                }
+                            });
+                        }
+
+                        this.heroSections = newSections;
+                    }
+                } else {
+                    throw new Error(
+                        response.data.message || "Operation failed"
+                    );
                 }
             } catch (error) {
                 console.error("Save error:", error);
@@ -605,7 +807,7 @@ export default {
                     errorMessage += `: ${errors.join(", ")}`;
                 }
 
-                this.showMessage(errorMessage, "error");
+                this.showToast(errorMessage, "error");
             } finally {
                 this.loading = false;
             }
@@ -614,10 +816,10 @@ export default {
         closeEditor() {
             this.showEditorModal = false;
             this.currentHeroSection = null;
+            this.isEditing = false;
         },
 
         getHeroPreviewStyle(heroSection) {
-            // Use first background image or first gradient
             let backgroundStyle = {};
 
             if (
@@ -656,6 +858,132 @@ export default {
     padding: 24px;
     background: #f8fafc;
     min-height: 100vh;
+}
+
+/* Toast Styles */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    max-width: 400px;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease;
+}
+
+.toast:hover {
+    transform: translateX(-5px);
+}
+
+.toast-success {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+}
+
+.toast-error {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.toast-warning {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.toast-info {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+}
+
+.toast-success .toast-icon {
+    background: #10b981;
+}
+
+.toast-error .toast-icon {
+    background: #ef4444;
+}
+
+.toast-warning .toast-icon {
+    background: #f59e0b;
+}
+
+.toast-info .toast-icon {
+    background: #3b82f6;
+}
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #111827;
+}
+
+.toast-message {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.toast-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    color: #6b7280;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 .page-header {
@@ -729,28 +1057,6 @@ export default {
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-}
-
-.alert {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 24px;
-    font-weight: 500;
-}
-
-.alert.success {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-}
-
-.alert.error {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
 }
 
 .loading-container {
@@ -1187,6 +1493,16 @@ input:checked + .toggle-slider:before {
 
     .preview-text small {
         font-size: 0.7rem;
+    }
+
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        max-width: none;
     }
 }
 
