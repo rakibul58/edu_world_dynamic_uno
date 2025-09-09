@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AboutSectionController;
+use App\Http\Controllers\AcademicProgramsController;
+use App\Http\Controllers\AcademicProgramsPublicController;
+use App\Http\Controllers\AcademicProgramsSettingsController;
 use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
@@ -89,18 +92,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('footer-sections/{footerSection}/activate', [FooterSectionController::class, 'activate']);
         Route::get('/news-events', [NewsEventsController::class, 'index']);
         Route::post('/news-events', [NewsEventsController::class, 'store']);
-        
+
         // Specific action routes (must come before {id} routes)
         Route::post('/news-events/update-order', [NewsEventsController::class, 'updateOrder']);
         Route::get('/news-events-settings', [NewsEventsController::class, 'getSectionSettings']);
         Route::post('/news-events-settings', [NewsEventsController::class, 'updateSectionSettings']);
-        
+
         // Parameterized routes (must come after specific routes)
         Route::get('/news-events/{id}', [NewsEventsController::class, 'show']);
         Route::put('/news-events/{id}', [NewsEventsController::class, 'update']);
         Route::post('/news-events/{id}', [NewsEventsController::class, 'update']); // For FormData with _method
         Route::delete('/news-events/{id}', [NewsEventsController::class, 'destroy']);
         Route::post('/news-events/{id}/toggle-status', [NewsEventsController::class, 'toggleStatus']);
+        // Route::apiResource('academic-programs', AcademicProgramsController::class);
+        Route::get('academic-programs', [AcademicProgramsController::class, 'index']);
+        Route::post('academic-programs', [AcademicProgramsController::class, 'store']);
+        Route::get('academic-programs/{id}', [AcademicProgramsController::class, 'show']);
+        Route::put('academic-programs/{id}', [AcademicProgramsController::class, 'update']);
+        Route::delete('academic-programs/{id}', [AcademicProgramsController::class, 'destroy']);
+        Route::post('academic-programs/{id}/toggle-status', [AcademicProgramsController::class, 'toggleStatus']);
+        Route::post('academic-programs/update-order', [AcademicProgramsController::class, 'updateOrder']);
+
+        // Academic Programs Settings
+        Route::get('academic-programs-settings', [AcademicProgramsSettingsController::class, 'index']);
+        Route::post('academic-programs-settings', [AcademicProgramsSettingsController::class, 'store']);
     });
 });
 
@@ -124,3 +139,13 @@ Route::get('admission-process/active', [AdmissionProcessController::class, 'getA
 Route::get('/location-section/public', [LocationSectionController::class, 'getPublicData']);
 Route::get('/footer-sections/active', [FooterSectionController::class, 'getActive']);
 Route::get('/news-events/active', [NewsEventsController::class, 'getPublicNewsEvents']);
+Route::get('academic-programs', [AcademicProgramsPublicController::class, 'index']);
+Route::get('academic-programs/{program}', [AcademicProgramsPublicController::class, 'show']);
+Route::get('academic-programs-component-data', [AcademicProgramsPublicController::class, 'getComponentData']);
+
+Route::get('/test-academic-programs', function () {
+    return response()->json([
+        'programs' => \App\Models\AcademicProgram::all(),
+        'settings' => \App\Models\AcademicProgramsSettings::first()
+    ]);
+});

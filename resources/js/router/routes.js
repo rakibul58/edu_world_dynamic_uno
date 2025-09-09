@@ -82,6 +82,11 @@ const routes = [
                 path: "manage-news-events-section",
                 name: "NewsEventsSection",
                 component: () => import("../components/admin/NewsEventsSectionManagement.vue"),
+            },
+            {
+                path: "manage-academic-programs",
+                name: "AcademicPrograms",
+                component: () => import("../components/admin/AcademicProgramsManagement.vue"),
             }
         ],
     },

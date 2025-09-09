@@ -16,6 +16,8 @@ class AcademicProgramsSettingsController extends Controller
 
     public function store(Request $request)
     {
+
+
         $validated = $request->validate([
             'section_title' => 'required|string|max:255',
             'section_description' => 'required|string',
@@ -32,11 +34,14 @@ class AcademicProgramsSettingsController extends Controller
             'container_max_width' => 'nullable|string|max:20',
             'container_padding' => 'nullable|string|max:50',
             'programs_gap' => 'nullable|string|max:20',
-            'enable_animations' => 'nullable|boolean',
+            'enable_animations' => 'nullable|in:true,false,1,0',
             'animation_duration' => 'nullable|string|max:20',
             'animation_delay_increment' => 'nullable|string|max:20',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'nullable|in:true,false,1,0',
         ]);
+
+        $validated['enable_animations'] = filter_var($validated['enable_animations'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $validated['is_active'] = filter_var($validated['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         $settings = AcademicProgramsSettings::first();
 
