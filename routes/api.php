@@ -5,6 +5,7 @@ use App\Http\Controllers\AcademicProgramsController;
 use App\Http\Controllers\AcademicProgramsPublicController;
 use App\Http\Controllers\AcademicProgramsSettingsController;
 use App\Http\Controllers\AdmissionProcessController;
+use App\Http\Controllers\FacilitiesSectionController;
 use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -123,6 +124,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('testimonials/{id}', [TestimonialController::class, 'update']);
         Route::delete('testimonials/{id}', [TestimonialController::class, 'destroy']);
         Route::post('testimonials/section-settings', [TestimonialController::class, 'sectionSettings']);
+
+        Route::get('facilities-sections', [FacilitiesSectionController::class, 'index']);
+        Route::post('facilities-sections', [FacilitiesSectionController::class, 'store']);
+        Route::put('facilities-sections/{id}', [FacilitiesSectionController::class, 'update']);
+        Route::delete('facilities-sections/{id}', [FacilitiesSectionController::class, 'destroy']);
+        Route::patch('facilities-sections/{id}/toggle-active', [FacilitiesSectionController::class, 'toggleActive']);
     });
 });
 
@@ -152,3 +159,5 @@ Route::get('academic-programs-component-data', [AcademicProgramsPublicController
 
 Route::get('testimonials', [TestimonialController::class, 'frontendIndex']);
 Route::get('testimonials/get', [TestimonialController::class, 'getTestimonials']);
+Route::get('facilities-sections/active', [FacilitiesSectionController::class, 'getActive']);
+Route::get('facilities-sections/{id}', [FacilitiesSectionController::class, 'show']);

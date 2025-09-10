@@ -92,6 +92,11 @@ const routes = [
                 path: "manage-testimonial-section",
                 name: "TestimonialSection",
                 component: () => import("../components/admin/TestimonialSectionManagement.vue"),
+            },
+            {
+                path: "manage-facilities-section",
+                name: "FacilitiesSection",
+                component: () => import("../components/admin/FacilitiesSectionManagement.vue"),
             }
         ],
     },
