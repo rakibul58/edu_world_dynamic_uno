@@ -87,6 +87,11 @@ const routes = [
                 path: "manage-academic-programs",
                 name: "AcademicPrograms",
                 component: () => import("../components/admin/AcademicProgramsManagement.vue"),
+            },
+            {
+                path: "manage-testimonial-section",
+                name: "TestimonialSection",
+                component: () => import("../components/admin/TestimonialSectionManagement.vue"),
             }
         ],
     },

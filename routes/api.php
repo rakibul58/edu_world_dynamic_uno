@@ -19,6 +19,7 @@ use App\Http\Controllers\NewsEventsController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProgramSettingController;
 use App\Http\Controllers\SectionStyleController;
+use App\Http\Controllers\TestimonialController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,6 +117,12 @@ Route::middleware('auth:sanctum')->group(function () {
         // Academic Programs Settings
         Route::get('academic-programs-settings', [AcademicProgramsSettingsController::class, 'index']);
         Route::post('academic-programs-settings', [AcademicProgramsSettingsController::class, 'store']);
+
+        Route::get('testimonials', [TestimonialController::class, 'index']);
+        Route::post('testimonials', [TestimonialController::class, 'store']);
+        Route::put('testimonials/{id}', [TestimonialController::class, 'update']);
+        Route::delete('testimonials/{id}', [TestimonialController::class, 'destroy']);
+        Route::post('testimonials/section-settings', [TestimonialController::class, 'sectionSettings']);
     });
 });
 
@@ -143,9 +150,5 @@ Route::get('academic-programs', [AcademicProgramsPublicController::class, 'index
 Route::get('academic-programs/{program}', [AcademicProgramsPublicController::class, 'show']);
 Route::get('academic-programs-component-data', [AcademicProgramsPublicController::class, 'getComponentData']);
 
-Route::get('/test-academic-programs', function () {
-    return response()->json([
-        'programs' => \App\Models\AcademicProgram::all(),
-        'settings' => \App\Models\AcademicProgramsSettings::first()
-    ]);
-});
+Route::get('testimonials', [TestimonialController::class, 'frontendIndex']);
+Route::get('testimonials/get', [TestimonialController::class, 'getTestimonials']);
