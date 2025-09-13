@@ -10,6 +10,7 @@ use App\Http\Controllers\CtaSectionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactCardController;
+use App\Http\Controllers\FeaturesController;
 use App\Http\Controllers\FooterSectionController;
 use App\Http\Controllers\PageSectionController;
 use App\Http\Controllers\HeaderSectionController;
@@ -130,6 +131,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('facilities-sections/{id}', [FacilitiesSectionController::class, 'update']);
         Route::delete('facilities-sections/{id}', [FacilitiesSectionController::class, 'destroy']);
         Route::patch('facilities-sections/{id}/toggle-active', [FacilitiesSectionController::class, 'toggleActive']);
+
+        Route::get('features', [FeaturesController::class, 'index']);
+        Route::post('features', [FeaturesController::class, 'store']);
+        Route::put('features/{id}', [FeaturesController::class, 'update']);
+        Route::delete('features/{id}', [FeaturesController::class, 'destroy']);
+        Route::post('features/{id}/toggle-status', [FeaturesController::class, 'toggleStatus']);
+        Route::post('features/update-order', [FeaturesController::class, 'updateOrder']);
+
+        // Section settings
+        Route::get('features-settings', [FeaturesController::class, 'getSettings']);
+        Route::post('features-settings', [FeaturesController::class, 'updateSettings']);
+        Route::delete('features-settings/remove-background-image', [FeaturesController::class, 'removeBackgroundImage']);
     });
 });
 
@@ -161,3 +174,5 @@ Route::get('testimonials', [TestimonialController::class, 'frontendIndex']);
 Route::get('testimonials/get', [TestimonialController::class, 'getTestimonials']);
 Route::get('facilities-sections/active', [FacilitiesSectionController::class, 'getActive']);
 Route::get('facilities-sections/{id}', [FacilitiesSectionController::class, 'show']);
+Route::get('features/active', [FeaturesController::class, 'getPublicData']);
+

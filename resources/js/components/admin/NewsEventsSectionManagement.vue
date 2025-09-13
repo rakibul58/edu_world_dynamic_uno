@@ -676,7 +676,7 @@
                                 />
                             </div>
                         </div>
-                        <div class="form-row">
+                        <!-- <div class="form-row">
                             <div class="form-group full-width">
                                 <label>Background Image</label>
                                 <input
@@ -710,7 +710,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- Layout Settings -->
