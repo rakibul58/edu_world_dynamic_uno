@@ -67,6 +67,17 @@ class FacilitiesSectionController extends Controller
     // Create new facilities section
     public function store(Request $request)
     {
+        if ($request->has('facility_items') && is_string($request->facility_items)) {
+            $request->merge([
+                'facility_items' => json_decode($request->facility_items, true)
+            ]);
+        }
+
+        if ($request->has('facility_buttons') && is_string($request->facility_buttons)) {
+            $request->merge([
+                'facility_buttons' => json_decode($request->facility_buttons, true)
+            ]);
+        }
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string',
@@ -95,10 +106,10 @@ class FacilitiesSectionController extends Controller
 
             // Handle image upload
             if ($request->hasFile('featured_image') && $data['featured_type'] === 'image') {
-                $imagePath = $request->file('featured_image')->store('facilities', 'public');
-                $data['featured_image_path'] = $imagePath;
+                $filename = time() . '_' . $request->file('featured_image')->getClientOriginalName();
+                $request->file('featured_image')->move(public_path('uploads/image'), $filename);
+                $data['featured_image_path'] = 'uploads/image/' . $filename;
             }
-
             // Create facilities section
             $section = FacilitiesSection::create($data);
 
@@ -131,6 +142,18 @@ class FacilitiesSectionController extends Controller
     // Update facilities section
     public function update(Request $request, $id)
     {
+
+        if ($request->has('facility_items') && is_string($request->facility_items)) {
+            $request->merge([
+                'facility_items' => json_decode($request->facility_items, true)
+            ]);
+        }
+
+        if ($request->has('facility_buttons') && is_string($request->facility_buttons)) {
+            $request->merge([
+                'facility_buttons' => json_decode($request->facility_buttons, true)
+            ]);
+        }
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string',
@@ -161,11 +184,13 @@ class FacilitiesSectionController extends Controller
             // Handle image upload
             if ($request->hasFile('featured_image') && $data['featured_type'] === 'image') {
                 // Delete old image if exists
-                if ($section->featured_image_path) {
-                    Storage::disk('public')->delete($section->featured_image_path);
+                if ($section->featured_image_path && file_exists(public_path($section->featured_image_path))) {
+                    unlink(public_path($section->featured_image_path));
                 }
-                $imagePath = $request->file('featured_image')->store('facilities', 'public');
-                $data['featured_image_path'] = $imagePath;
+
+                $filename = time() . '_' . $request->file('featured_image')->getClientOriginalName();
+                $request->file('featured_image')->move(public_path('uploads/image'), $filename);
+                $data['featured_image_path'] = 'uploads/image/' . $filename;
             }
 
             // Update facilities section
@@ -206,9 +231,10 @@ class FacilitiesSectionController extends Controller
             $section = FacilitiesSection::findOrFail($id);
 
             // Delete associated image if exists
-            if ($section->featured_image_path) {
-                Storage::disk('public')->delete($section->featured_image_path);
+            if ($section->featured_image_path && file_exists(public_path($section->featured_image_path))) {
+                unlink(public_path($section->featured_image_path));
             }
+
 
             $section->delete();
 
@@ -228,15 +254,16 @@ class FacilitiesSectionController extends Controller
     {
         try {
             $section = FacilitiesSection::findOrFail($id);
+            $activeChanged = !$section->is_active;
 
             // Deactivate all other sections
-            FacilitiesSection::where('id', '!=', $id)->update(['is_active' => false]);
+            FacilitiesSection::where('id', '!=', $id)->update(['is_active' => !$activeChanged]);
 
             // Activate this section
-            $section->update(['is_active' => true]);
+            $section->update(['is_active' => $activeChanged]);
 
             return response()->json([
-                'message' => 'Facilities section activated successfully',
+                'message' => 'Facilities section activation toggled successfully',
                 'data' => $section
             ]);
         } catch (\Exception $e) {
