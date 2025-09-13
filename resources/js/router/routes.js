@@ -97,6 +97,11 @@ const routes = [
                 path: "manage-facilities-section",
                 name: "FacilitiesSection",
                 component: () => import("../components/admin/FacilitiesSectionManagement.vue"),
+            },
+            {
+                path: "manage-gallery-section",
+                name: "GallerySection",
+                component: () => import("../components/admin/GallerySectionManagement.vue"),
             }
         ],
     },

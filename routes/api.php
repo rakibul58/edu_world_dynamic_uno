@@ -12,6 +12,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactCardController;
 use App\Http\Controllers\FeaturesController;
 use App\Http\Controllers\FooterSectionController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\PageSectionController;
 use App\Http\Controllers\HeaderSectionController;
 use App\Http\Controllers\HeroSectionController;
@@ -143,6 +144,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('features-settings', [FeaturesController::class, 'getSettings']);
         Route::post('features-settings', [FeaturesController::class, 'updateSettings']);
         Route::delete('features-settings/remove-background-image', [FeaturesController::class, 'removeBackgroundImage']);
+
+        Route::get('/gallery', [GalleryController::class, 'index']);
+        Route::post('/gallery', [GalleryController::class, 'store']);
+        Route::get('/gallery/{id}', [GalleryController::class, 'show']);
+        Route::put('/gallery/{id}', [GalleryController::class, 'update']);
+        Route::delete('/gallery/{id}', [GalleryController::class, 'destroy']);
+        Route::post('/gallery/{id}/toggle-status', [GalleryController::class, 'toggleStatus']);
+        Route::post('/gallery/update-order', [GalleryController::class, 'updateOrder']);
+
+        // Gallery Settings
+        Route::get('/gallery-settings', [GalleryController::class, 'getSettings']);
+        Route::post('/gallery-settings', [GalleryController::class, 'updateSettings']);
     });
 });
 
@@ -175,4 +188,5 @@ Route::get('testimonials/get', [TestimonialController::class, 'getTestimonials']
 Route::get('facilities-sections/active', [FacilitiesSectionController::class, 'getActive']);
 Route::get('facilities-sections/{id}', [FacilitiesSectionController::class, 'show']);
 Route::get('features/active', [FeaturesController::class, 'getPublicData']);
-
+Route::get('/gallery', [GalleryController::class, 'pubicIndex']);
+Route::get('/gallery-settings', [GalleryController::class, 'settings']);
