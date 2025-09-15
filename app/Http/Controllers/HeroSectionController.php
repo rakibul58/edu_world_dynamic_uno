@@ -350,12 +350,18 @@ class HeroSectionController extends Controller
      */
     private function deleteFile($filePath): void
     {
-        if ($filePath && strpos($filePath, '/storage/') === 0) {
+        // Add type checking to prevent the strpos error
+        if (!$filePath || !is_string($filePath)) {
+            return;
+        }
+
+        if (strpos($filePath, '/storage/') === 0) {
             $relativePath = str_replace('/storage/', '', $filePath);
             Storage::disk('public')->delete($relativePath);
         }
     }
 
+    
     /**
      * Delete associated files for a hero section
      */
@@ -363,8 +369,17 @@ class HeroSectionController extends Controller
     {
         // Delete background images
         if ($heroSection->background_images) {
-            foreach ($heroSection->background_images as $image) {
-                $this->deleteFile($image);
+            // Handle the array properly since background_images is cast as array
+            $backgroundImages = $heroSection->background_images;
+            if (is_array($backgroundImages)) {
+                foreach ($backgroundImages as $image) {
+                    // Handle both string paths and image objects
+                    if (is_string($image)) {
+                        $this->deleteFile($image);
+                    } elseif (is_array($image) && isset($image['url'])) {
+                        $this->deleteFile($image['url']);
+                    }
+                }
             }
         }
 
@@ -374,7 +389,6 @@ class HeroSectionController extends Controller
             $this->deleteFile($navigation['logo']['image_path']);
         }
     }
-
     /**
      * Validate hero section data
      */

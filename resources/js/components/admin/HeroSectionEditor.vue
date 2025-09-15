@@ -198,19 +198,19 @@
                     <div class="background-section">
                         <h4 class="subsection-title">Slider Settings</h4>
                         <div class="form-group">
-                            <label class="toggle-group">
-                                <input
-                                    v-model="formData.enable_slider"
-                                    type="checkbox"
-                                    class="toggle-switch-input"
-                                />
-                                <span class="toggle-switch">
+                            <div class="toggle-group">
+                                <label class="toggle-switch">
+                                    <input
+                                        v-model="formData.enable_slider"
+                                        type="checkbox"
+                                        class="toggle-switch-input"
+                                    />
                                     <span class="toggle-slider"></span>
-                                </span>
+                                </label>
                                 <span class="toggle-label"
                                     >Enable Background Slider</span
                                 >
-                            </label>
+                            </div>
                         </div>
 
                         <div v-if="formData.enable_slider" class="form-group">
@@ -864,19 +864,19 @@
                     <h3 class="section-title">Navigation Settings</h3>
 
                     <div class="form-group">
-                        <label class="toggle-group">
-                            <input
-                                v-model="formData.show_navigation"
-                                type="checkbox"
-                                class="toggle-switch-input"
-                            />
-                            <span class="toggle-switch">
+                        <div class="toggle-group">
+                            <label class="toggle-switch">
+                                <input
+                                    v-model="formData.show_navigation"
+                                    type="checkbox"
+                                    class="toggle-switch-input"
+                                />
                                 <span class="toggle-slider"></span>
-                            </span>
+                            </label>
                             <span class="toggle-label"
                                 >Show Navigation Bar</span
                             >
-                        </label>
+                        </div>
                     </div>
 
                     <div v-if="formData.show_navigation">
@@ -1746,34 +1746,39 @@ export default {
         initializeFormData(heroSection) {
             // Deep merge the hero section data with default form data
             this.formData = this.deepMerge(this.formData, heroSection);
-            
+
             // Ensure button structures are properly initialized
             if (this.formData.cta_buttons) {
-                this.formData.cta_buttons = this.formData.cta_buttons.map((button) => ({
-                    text: button.text || "Button",
-                    url: button.url || "#",
-                    type: button.type || "primary",
-                    target: button.target || "_self",
-                    styles: {
-                        background: "#20bf6b",
-                        color: "#fff",
-                        border: "2px solid #20bf6b",
-                        borderRadius: "6px",
-                        padding: "10px 28px",
-                        fontWeight: "500",
-                        ...button.styles
-                    },
-                    hover_styles: {
-                        background: "transparent",
-                        color: "#20bf6b",
-                        transform: "translateY(-2px)",
-                        ...button.hover_styles
-                    },
-                }));
+                this.formData.cta_buttons = this.formData.cta_buttons.map(
+                    (button) => ({
+                        text: button.text || "Button",
+                        url: button.url || "#",
+                        type: button.type || "primary",
+                        target: button.target || "_self",
+                        styles: {
+                            background: "#20bf6b",
+                            color: "#fff",
+                            border: "2px solid #20bf6b",
+                            borderRadius: "6px",
+                            padding: "10px 28px",
+                            fontWeight: "500",
+                            ...button.styles,
+                        },
+                        hover_styles: {
+                            background: "transparent",
+                            color: "#20bf6b",
+                            transform: "translateY(-2px)",
+                            ...button.hover_styles,
+                        },
+                    })
+                );
             }
 
             // Convert meta_tags array to string for editing
-            if (this.formData.meta_tags && Array.isArray(this.formData.meta_tags)) {
+            if (
+                this.formData.meta_tags &&
+                Array.isArray(this.formData.meta_tags)
+            ) {
                 this.metaTagsString = this.formData.meta_tags.join(", ");
             }
 
@@ -1787,7 +1792,7 @@ export default {
                     text: "Your Brand",
                     url: "/",
                     alt: "Logo",
-                    image_path: ""
+                    image_path: "",
                 };
             }
             if (!this.formData.navigation.menu_items) {
@@ -1798,8 +1803,15 @@ export default {
         deepMerge(target, source) {
             const result = { ...target };
             for (const key in source) {
-                if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-                    result[key] = this.deepMerge(target[key] || {}, source[key]);
+                if (
+                    source[key] &&
+                    typeof source[key] === "object" &&
+                    !Array.isArray(source[key])
+                ) {
+                    result[key] = this.deepMerge(
+                        target[key] || {},
+                        source[key]
+                    );
                 } else {
                     result[key] = source[key];
                 }
@@ -1809,27 +1821,31 @@ export default {
 
         handleSubmit() {
             if (this.saving) return;
-            
+
             this.saving = true;
 
             const formData = new FormData();
 
             // Add all form fields as JSON strings for Laravel to parse
             const jsonFields = [
-                'background_gradients',
-                'cta_buttons', 
-                'text_styles',
-                'overlay_styles', 
-                'section_styles',
-                'navigation',
-                'nav_styles',
-                'advanced_settings',
-                'meta_tags'
+                "background_gradients",
+                "cta_buttons",
+                "text_styles",
+                "overlay_styles",
+                "section_styles",
+                "navigation",
+                "nav_styles",
+                "advanced_settings",
+                "meta_tags",
             ];
 
             Object.keys(this.formData).forEach((key) => {
                 const value = this.formData[key];
-                if (jsonFields.includes(key) && (typeof value === 'object' && value !== null)) {
+                if (
+                    jsonFields.includes(key) &&
+                    typeof value === "object" &&
+                    value !== null
+                ) {
                     formData.append(key, JSON.stringify(value));
                 } else if (value !== null && value !== undefined) {
                     formData.append(key, value);
@@ -1894,7 +1910,10 @@ export default {
 
         processBackgroundFile(file) {
             if (file.size > 2 * 1024 * 1024) {
-                this.$emit("error", "Background file size must be less than 2MB");
+                this.$emit(
+                    "error",
+                    "Background file size must be less than 2MB"
+                );
                 return;
             }
 
@@ -1922,7 +1941,8 @@ export default {
 
         // Gradient methods
         addGradient(preset = null) {
-            const newGradient = preset || "linear-gradient(135deg, #ff7101, #102e4a)";
+            const newGradient =
+                preset || "linear-gradient(135deg, #ff7101, #102e4a)";
             if (!this.formData.background_gradients) {
                 this.formData.background_gradients = [];
             }
@@ -1930,7 +1950,10 @@ export default {
         },
 
         removeGradient(index) {
-            if (this.formData.background_gradients && this.formData.background_gradients.length > 1) {
+            if (
+                this.formData.background_gradients &&
+                this.formData.background_gradients.length > 1
+            ) {
                 this.formData.background_gradients.splice(index, 1);
             }
         },
@@ -1970,7 +1993,7 @@ export default {
             if (!this.formData.cta_buttons) {
                 this.formData.cta_buttons = [];
             }
-            
+
             this.formData.cta_buttons.push({
                 text: "New Button",
                 url: "#",
@@ -1993,7 +2016,10 @@ export default {
         },
 
         removeButton(index) {
-            if (this.formData.cta_buttons && this.formData.cta_buttons.length > 1) {
+            if (
+                this.formData.cta_buttons &&
+                this.formData.cta_buttons.length > 1
+            ) {
                 this.formData.cta_buttons.splice(index, 1);
             }
         },
@@ -2018,7 +2044,7 @@ export default {
             if (!this.formData.navigation.menu_items) {
                 this.formData.navigation.menu_items = [];
             }
-            
+
             this.formData.navigation.menu_items.push({
                 title: "Menu Item",
                 url: "#",
@@ -2049,10 +2075,9 @@ export default {
 
         removeSubMenuItem(parentIndex, subIndex) {
             if (this.formData.navigation.menu_items[parentIndex].sub_items) {
-                this.formData.navigation.menu_items[parentIndex].sub_items.splice(
-                    subIndex,
-                    1
-                );
+                this.formData.navigation.menu_items[
+                    parentIndex
+                ].sub_items.splice(subIndex, 1);
             }
         },
 
@@ -2330,18 +2355,26 @@ export default {
     border-color: #ff7101;
 }
 
+.toggle-group {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
 .toggle-switch {
     position: relative;
     display: inline-block;
     width: 48px;
     height: 24px;
     margin-right: 10px;
+    flex-shrink: 0;
 }
 
 .toggle-switch-input {
     opacity: 0;
     width: 0;
     height: 0;
+    position: absolute;
 }
 
 .toggle-slider {
@@ -2352,7 +2385,7 @@ export default {
     right: 0;
     bottom: 0;
     background-color: #cbd5e1;
-    transition: 0.4s;
+    transition: all 0.3s ease;
     border-radius: 24px;
 }
 
@@ -2364,10 +2397,12 @@ export default {
     left: 3px;
     bottom: 3px;
     background-color: white;
-    transition: 0.4s;
+    transition: all 0.3s ease;
     border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+/* Active state for toggle */
 .toggle-switch-input:checked + .toggle-slider {
     background-color: #ff7101;
 }
@@ -2376,57 +2411,19 @@ export default {
     transform: translateX(24px);
 }
 
-/* Ensure the toggle label is properly aligned */
-.toggle-group {
-    display: flex;
-    align-items: center;
+/* Focus state for accessibility */
+.toggle-switch-input:focus + .toggle-slider {
+    box-shadow: 0 0 0 3px rgba(255, 113, 1, 0.1);
 }
 
 .toggle-label {
     margin-left: 8px;
+    font-weight: 500;
+    color: #374151;
+    user-select: none;
 }
 
-.radio-group {
-    display: flex;
-    gap: 16px;
-    margin-top: 8px;
-}
-
-.radio-option {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.radio-custom {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #d1d5db;
-    border-radius: 50%;
-    margin-right: 8px;
-    position: relative;
-    transition: border-color 0.2s;
-}
-
-.radio-option input[type="radio"] {
-    display: none;
-}
-
-.radio-option input[type="radio"]:checked + .radio-custom {
-    border-color: #ff7101;
-}
-
-.radio-option input[type="radio"]:checked + .radio-custom:after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #ff7101;
-}
-
+/* Checkbox styling */
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -2438,20 +2435,27 @@ export default {
     display: flex;
     align-items: center;
     cursor: pointer;
-}
-
-.checkbox-custom {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #d1d5db;
-    border-radius: 3px;
-    margin-right: 8px;
-    position: relative;
-    transition: border-color 0.2s;
+    padding: 4px 0;
+    user-select: none;
 }
 
 .checkbox-option input[type="checkbox"] {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+    background: white;
+    flex-shrink: 0;
 }
 
 .checkbox-option input[type="checkbox"]:checked + .checkbox-custom {
@@ -2460,13 +2464,79 @@ export default {
 }
 
 .checkbox-option input[type="checkbox"]:checked + .checkbox-custom:after {
-    content: "✓";
+    content: "";
     position: absolute;
-    top: -2px;
-    left: 2px;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-option input[type="checkbox"]:focus + .checkbox-custom {
+    box-shadow: 0 0 0 3px rgba(255, 113, 1, 0.1);
+}
+
+.checkbox-option:hover .checkbox-custom {
+    border-color: #ff7101;
+}
+
+/* Radio button styling */
+.radio-group {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    margin-right: 8px;
+    position: relative;
+    transition: all 0.2s ease;
+    background: white;
+    flex-shrink: 0;
+}
+
+.radio-option input[type="radio"]:checked + .radio-custom {
+    border-color: #ff7101;
+}
+
+.radio-option input[type="radio"]:checked + .radio-custom:after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff7101;
+}
+
+.radio-option input[type="radio"]:focus + .radio-custom {
+    box-shadow: 0 0 0 3px rgba(255, 113, 1, 0.1);
+}
+
+.radio-option:hover .radio-custom {
+    border-color: #ff7101;
 }
 
 .upload-dropzone {
@@ -2732,10 +2802,9 @@ export default {
     margin-top: 12px;
     border-radius: 6px;
     overflow: hidden;
-    
 }
 
-.preview-overlay{
+.preview-overlay {
     padding: 10px;
 }
 

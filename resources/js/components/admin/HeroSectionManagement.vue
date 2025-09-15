@@ -384,11 +384,17 @@ export default {
             try {
                 const response = await axios.get("/admin/hero-sections");
                 if (response.data.success) {
-                    // Force reactivity update
+                    // Clear array first to ensure clean state
                     this.heroSections = [];
-                    this.$nextTick(() => {
-                        this.heroSections = response.data.data;
-                    });
+
+                    // Use nextTick to ensure DOM updates before setting new data
+                    await this.$nextTick();
+
+                    // Set new data with timestamp to force reactivity
+                    this.heroSections = response.data.data.map((section) => ({
+                        ...section,
+                        _reactivityKey: Date.now() + Math.random(),
+                    }));
                 } else {
                     throw new Error(
                         response.data.message || "Failed to fetch hero sections"
@@ -662,10 +668,20 @@ export default {
             this.showEditorModal = true;
         },
 
-        editHeroSection(heroSection) {
-            this.currentHeroSection = JSON.parse(JSON.stringify(heroSection));
-            this.isEditing = true;
-            this.showEditorModal = true;
+        deepClone(obj) {
+            if (obj === null || typeof obj !== "object") return obj;
+            if (obj instanceof Date) return new Date(obj.getTime());
+            if (obj instanceof Array)
+                return obj.map((item) => this.deepClone(item));
+            if (typeof obj === "object") {
+                const clonedObj = {};
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        clonedObj[key] = this.deepClone(obj[key]);
+                    }
+                }
+                return clonedObj;
+            }
         },
 
         async duplicateHeroSection(heroSection) {
@@ -684,15 +700,21 @@ export default {
                         "success"
                     );
 
-                    // Check if the section already exists to prevent duplicates
                     const newSection = response.data.data;
+
+                    // Check if section already exists (prevent duplicates)
                     const existingIndex = this.heroSections.findIndex(
                         (s) => s.id === newSection.id
                     );
 
                     if (existingIndex === -1) {
-                        // Add new section at the beginning only if it doesn't exist
-                        this.heroSections.unshift({ ...newSection });
+                        // Add new section only if it doesn't exist
+                        this.heroSections = [newSection, ...this.heroSections];
+                    } else {
+                        // If it exists, just update it
+                        const newSections = [...this.heroSections];
+                        newSections[existingIndex] = { ...newSection };
+                        this.heroSections = newSections;
                     }
                 } else {
                     throw new Error(
@@ -747,37 +769,42 @@ export default {
                         `Hero section ${actionText} successfully`,
                         "success"
                     );
+
+                    // CRITICAL: Close editor FIRST to prevent duplication
                     this.closeEditor();
 
-                    // Force reactivity update
+                    // THEN update the data with proper reactivity
                     if (this.isEditing) {
+                        // For updates: replace the existing item
+                        const updatedSection = response.data.data;
                         const newSections = [...this.heroSections];
                         const index = newSections.findIndex(
-                            (s) => s.id === response.data.data.id
+                            (s) => s.id === updatedSection.id
                         );
+
                         if (index !== -1) {
-                            newSections[index] = { ...response.data.data };
-                        }
+                            // Replace with updated data
+                            newSections[index] = { ...updatedSection };
 
-                        // Handle active status updates
-                        if (response.data.data.is_active) {
-                            newSections.forEach((section, idx) => {
-                                if (idx !== index) {
-                                    section.is_active = false;
-                                }
-                            });
-                        }
+                            // Handle active status: if this section became active, deactivate others
+                            if (updatedSection.is_active) {
+                                newSections.forEach((section, idx) => {
+                                    if (idx !== index) {
+                                        section.is_active = false;
+                                    }
+                                });
+                            }
 
-                        this.heroSections = newSections;
+                            // Trigger reactivity with new array reference
+                            this.heroSections = newSections;
+                        }
                     } else {
-                        // For new sections, add to beginning
-                        const newSections = [
-                            response.data.data,
-                            ...this.heroSections,
-                        ];
+                        // For new sections: add to beginning
+                        const newSection = response.data.data;
+                        const newSections = [newSection, ...this.heroSections];
 
-                        // Handle active status
-                        if (response.data.data.is_active) {
+                        // Handle active status: if new section is active, deactivate others
+                        if (newSection.is_active) {
                             newSections.forEach((section, idx) => {
                                 if (idx !== 0) {
                                     section.is_active = false;
@@ -817,6 +844,18 @@ export default {
             this.showEditorModal = false;
             this.currentHeroSection = null;
             this.isEditing = false;
+            // Force Vue to clean up any refs or watchers
+            this.$nextTick(() => {
+                // Additional cleanup if needed
+            });
+        },
+
+        // 3. FIXED: editHeroSection method with deep cloning
+        editHeroSection(heroSection) {
+            // Create a proper deep copy to avoid reference issues
+            this.currentHeroSection = this.deepClone(heroSection);
+            this.isEditing = true;
+            this.showEditorModal = true;
         },
 
         getHeroPreviewStyle(heroSection) {
