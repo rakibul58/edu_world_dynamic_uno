@@ -1545,6 +1545,8 @@ export default {
             logoPreview: null,
             logoFile: null,
             backgroundFiles: [],
+            // Track original images for proper deletion
+            originalBackgroundImages: [],
             previewSlide: 0,
             previewSliderActive: false,
             previewInterval: null,
@@ -1554,8 +1556,7 @@ export default {
                 title: "Welcome To",
                 title_highlight: "Your Brand",
                 subtitle: "A Complete Solution",
-                tagline:
-                    "Your perfect tagline goes here to describe your amazing service.",
+                tagline: "Your perfect tagline goes here to describe your amazing service.",
                 background_images: [],
                 background_gradients: [
                     "linear-gradient(135deg, #ff7101, #102e4a)",
@@ -1640,8 +1641,7 @@ export default {
                     },
                 },
                 overlay_styles: {
-                    background:
-                        "linear-gradient(135deg, rgba(6, 6, 7, 0.8), rgba(0, 30, 60, 0.7))",
+                    background: "linear-gradient(135deg, rgba(6, 6, 7, 0.8), rgba(0, 30, 60, 0.7))",
                     opacity: "1",
                 },
                 section_styles: {
@@ -1746,15 +1746,50 @@ export default {
         initializeFormData(heroSection) {
             // Deep merge the hero section data with default form data
             this.formData = this.deepMerge(this.formData, heroSection);
-
+            
+            // Store original background images for tracking deletion
+            this.originalBackgroundImages = Array.isArray(this.formData.background_images) 
+                ? [...this.formData.background_images] 
+                : [];
+            
+            // Ensure required fields are not null
+            this.formData.section_name = this.formData.section_name || "";
+            this.formData.title = this.formData.title || "Welcome To";
+            this.formData.title_highlight = this.formData.title_highlight || "";
+            this.formData.subtitle = this.formData.subtitle || "";
+            this.formData.tagline = this.formData.tagline || "";
+            this.formData.meta_title = this.formData.meta_title || "";
+            this.formData.meta_description = this.formData.meta_description || "";
+            this.formData.slider_interval = this.formData.slider_interval || 3500;
+            
+            // Ensure booleans are properly set
+            this.formData.is_active = Boolean(this.formData.is_active);
+            this.formData.enable_slider = Boolean(this.formData.enable_slider);
+            this.formData.show_navigation = Boolean(this.formData.show_navigation);
+            
+            // Ensure arrays are properly initialized
+            this.formData.background_images = Array.isArray(this.formData.background_images) 
+                ? this.formData.background_images 
+                : [];
+            this.formData.background_gradients = Array.isArray(this.formData.background_gradients) 
+                ? this.formData.background_gradients 
+                : [
+                    "linear-gradient(135deg, #ff7101, #102e4a)",
+                    "linear-gradient(135deg, #20bf6b, #102e4a)",
+                    "linear-gradient(135deg, #f7b731, #102e4a)"
+                ];
+            this.formData.meta_tags = Array.isArray(this.formData.meta_tags) 
+                ? this.formData.meta_tags 
+                : [];
+            
             // Ensure button structures are properly initialized
-            if (this.formData.cta_buttons) {
-                this.formData.cta_buttons = this.formData.cta_buttons.map(
-                    (button) => ({
-                        text: button.text || "Button",
-                        url: button.url || "#",
-                        type: button.type || "primary",
-                        target: button.target || "_self",
+            if (!Array.isArray(this.formData.cta_buttons) || this.formData.cta_buttons.length === 0) {
+                this.formData.cta_buttons = [
+                    {
+                        text: "Get Started",
+                        url: "#",
+                        type: "primary",
+                        target: "_self",
                         styles: {
                             background: "#20bf6b",
                             color: "#fff",
@@ -1762,29 +1797,55 @@ export default {
                             borderRadius: "6px",
                             padding: "10px 28px",
                             fontWeight: "500",
-                            ...button.styles,
                         },
                         hover_styles: {
                             background: "transparent",
                             color: "#20bf6b",
                             transform: "translateY(-2px)",
-                            ...button.hover_styles,
                         },
-                    })
-                );
+                    }
+                ];
+            } else {
+                this.formData.cta_buttons = this.formData.cta_buttons.map((button) => ({
+                    text: button.text || "Button",
+                    url: button.url || "#",
+                    type: button.type || "primary",
+                    target: button.target || "_self",
+                    styles: {
+                        background: "#20bf6b",
+                        color: "#fff",
+                        border: "2px solid #20bf6b",
+                        borderRadius: "6px",
+                        padding: "10px 28px",
+                        fontWeight: "500",
+                        ...button.styles
+                    },
+                    hover_styles: {
+                        background: "transparent",
+                        color: "#20bf6b",
+                        transform: "translateY(-2px)",
+                        ...button.hover_styles
+                    },
+                }));
             }
 
             // Convert meta_tags array to string for editing
-            if (
-                this.formData.meta_tags &&
-                Array.isArray(this.formData.meta_tags)
-            ) {
+            if (this.formData.meta_tags && Array.isArray(this.formData.meta_tags)) {
                 this.metaTagsString = this.formData.meta_tags.join(", ");
             }
 
             // Ensure navigation structure is correct
             if (!this.formData.navigation) {
-                this.formData.navigation = { logo: {}, menu_items: [] };
+                this.formData.navigation = { 
+                    logo: {
+                        type: "text",
+                        text: "Your Brand",
+                        url: "/",
+                        alt: "Logo",
+                        image_path: ""
+                    }, 
+                    menu_items: [] 
+                };
             }
             if (!this.formData.navigation.logo) {
                 this.formData.navigation.logo = {
@@ -1792,26 +1853,78 @@ export default {
                     text: "Your Brand",
                     url: "/",
                     alt: "Logo",
-                    image_path: "",
+                    image_path: ""
                 };
             }
-            if (!this.formData.navigation.menu_items) {
+            if (!Array.isArray(this.formData.navigation.menu_items)) {
                 this.formData.navigation.menu_items = [];
             }
+
+            // Ensure nested objects are properly initialized
+            this.formData.text_styles = this.deepMerge({
+                title: {
+                    fontSize: "1.9rem",
+                    fontWeight: "700",
+                    color: "#ffffff",
+                    marginBottom: "8px",
+                },
+                title_highlight: {
+                    color: "#ff7101",
+                },
+                subtitle: {
+                    fontSize: "1.5rem",
+                    fontWeight: "600",
+                    color: "#21bf6b",
+                    marginBottom: "12px",
+                },
+                tagline: {
+                    fontSize: "2.2rem",
+                    fontWeight: "800",
+                    color: "#f7b731",
+                    lineHeight: "1.05",
+                    marginBottom: "18px",
+                },
+            }, this.formData.text_styles || {});
+
+            this.formData.overlay_styles = this.deepMerge({
+                background: "linear-gradient(135deg, rgba(6, 6, 7, 0.8), rgba(0, 30, 60, 0.7))",
+                opacity: "1",
+            }, this.formData.overlay_styles || {});
+
+            this.formData.section_styles = this.deepMerge({
+                minHeight: "80vh",
+                padding: "110px 20px 80px",
+                display: "block",
+                overflow: "hidden",
+            }, this.formData.section_styles || {});
+
+            this.formData.nav_styles = this.deepMerge({
+                background: "transparent",
+                scrolled_background: "rgba(0, 30, 60, 0.95)",
+                link_color: "#fff",
+                link_hover_color: "#d35b00",
+                dropdown_background: "#fff",
+                dropdown_border_color: "#ff7101",
+                mobile_background: "rgba(0, 30, 60, 0.95)",
+            }, this.formData.nav_styles || {});
+
+            this.formData.advanced_settings = this.deepMerge({
+                enable_animations: true,
+                transition_duration: "1s",
+                enable_zoom_effect: true,
+                zoom_duration: "8s",
+                mobile_responsive: true,
+                lazy_load_images: true,
+                scroll_behavior: "smooth",
+                preload_images: true,
+            }, this.formData.advanced_settings || {});
         },
 
         deepMerge(target, source) {
             const result = { ...target };
             for (const key in source) {
-                if (
-                    source[key] &&
-                    typeof source[key] === "object" &&
-                    !Array.isArray(source[key])
-                ) {
-                    result[key] = this.deepMerge(
-                        target[key] || {},
-                        source[key]
-                    );
+                if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                    result[key] = this.deepMerge(target[key] || {}, source[key]);
                 } else {
                     result[key] = source[key];
                 }
@@ -1819,36 +1932,107 @@ export default {
             return result;
         },
 
+        validateFormData() {
+            const errors = [];
+
+            // Required field validation
+            if (!this.formData.section_name || this.formData.section_name.trim() === '') {
+                errors.push('Section name is required');
+            }
+
+            // String length validation
+            if (this.formData.section_name && this.formData.section_name.length > 255) {
+                errors.push('Section name must not exceed 255 characters');
+            }
+            if (this.formData.title && this.formData.title.length > 255) {
+                errors.push('Title must not exceed 255 characters');
+            }
+            if (this.formData.title_highlight && this.formData.title_highlight.length > 255) {
+                errors.push('Title highlight must not exceed 255 characters');
+            }
+            if (this.formData.subtitle && this.formData.subtitle.length > 255) {
+                errors.push('Subtitle must not exceed 255 characters');
+            }
+            if (this.formData.meta_title && this.formData.meta_title.length > 255) {
+                errors.push('Meta title must not exceed 255 characters');
+            }
+            if (this.formData.meta_description && this.formData.meta_description.length > 500) {
+                errors.push('Meta description must not exceed 500 characters');
+            }
+
+            // Slider interval validation
+            if (this.formData.slider_interval && (this.formData.slider_interval < 1000 || this.formData.slider_interval > 15000)) {
+                errors.push('Slider interval must be between 1000 and 15000 milliseconds');
+            }
+
+            // Button validation
+            if (this.formData.cta_buttons && this.formData.cta_buttons.length > 0) {
+                this.formData.cta_buttons.forEach((button, index) => {
+                    if (!button.text || button.text.trim() === '') {
+                        errors.push(`Button ${index + 1} text is required`);
+                    }
+                    if (!button.url || button.url.trim() === '') {
+                        errors.push(`Button ${index + 1} URL is required`);
+                    }
+                });
+            }
+
+            // Navigation validation
+            if (this.formData.show_navigation && this.formData.navigation) {
+                if (this.formData.navigation.logo && this.formData.navigation.logo.type === 'text' && 
+                    (!this.formData.navigation.logo.text || this.formData.navigation.logo.text.trim() === '')) {
+                    errors.push('Logo text is required when using text logo');
+                }
+            }
+
+            return errors;
+        },
+
         handleSubmit() {
             if (this.saving) return;
-
+            
+            // Validate form data
+            const validationErrors = this.validateFormData();
+            if (validationErrors.length > 0) {
+                this.$emit("error", validationErrors.join('. '));
+                return;
+            }
+            
             this.saving = true;
 
             const formData = new FormData();
 
-            // Add all form fields as JSON strings for Laravel to parse
+            // Track current background images for proper deletion handling
+            const currentBackgroundImages = this.getCurrentBackgroundImages();
+            formData.append('current_background_images', JSON.stringify(currentBackgroundImages));
+
+            // Add all form fields with proper handling
             const jsonFields = [
-                "background_gradients",
-                "cta_buttons",
-                "text_styles",
-                "overlay_styles",
-                "section_styles",
-                "navigation",
-                "nav_styles",
-                "advanced_settings",
-                "meta_tags",
+                'background_gradients',
+                'cta_buttons', 
+                'text_styles',
+                'overlay_styles', 
+                'section_styles',
+                'navigation',
+                'nav_styles',
+                'advanced_settings',
+                'meta_tags'
             ];
 
             Object.keys(this.formData).forEach((key) => {
                 const value = this.formData[key];
-                if (
-                    jsonFields.includes(key) &&
-                    typeof value === "object" &&
-                    value !== null
-                ) {
-                    formData.append(key, JSON.stringify(value));
-                } else if (value !== null && value !== undefined) {
-                    formData.append(key, value);
+                
+                if (jsonFields.includes(key)) {
+                    if (value !== null && value !== undefined) {
+                        formData.append(key, JSON.stringify(value));
+                    }
+                } else if (key === 'background_images') {
+                    // Skip background_images as we handle it via current_background_images and files
+                    return;
+                } else if (typeof value === 'boolean') {
+                    formData.append(key, value ? '1' : '0');
+                } else if (value !== null && value !== undefined && value !== '') {
+                    formData.append(key, String(value));
                 }
             });
 
@@ -1877,6 +2061,19 @@ export default {
             }, 2000);
         },
 
+        getCurrentBackgroundImages() {
+            // Return current background images that should be kept
+            // Only include existing images that haven't been removed
+            return this.formData.background_images.filter(image => {
+                // Keep images that are URLs (existing images)
+                return typeof image === 'string' && (
+                    image.startsWith('http') || 
+                    image.startsWith('/uploads/') || 
+                    image.startsWith('uploads/')
+                );
+            });
+        },
+
         getLogoUrl() {
             if (this.logoPreview) {
                 return this.logoPreview;
@@ -1884,12 +2081,12 @@ export default {
 
             if (this.formData.navigation?.logo?.image_path) {
                 const imagePath = this.formData.navigation.logo.image_path;
-                // If it's already a full URL, return as is
                 if (imagePath.startsWith("http") || imagePath.startsWith("/")) {
                     return imagePath;
+                } else if (imagePath.startsWith("uploads/")) {
+                    return "/" + imagePath;
                 }
-                // Otherwise, assume it's in public folder
-                return "/" + imagePath;
+                return imagePath;
             }
 
             return "";
@@ -1909,52 +2106,35 @@ export default {
         },
 
         processBackgroundFile(file) {
-            if (file.size > 2 * 1024 * 1024) {
-                this.$emit(
-                    "error",
-                    "Background file size must be less than 2MB"
-                );
-                return;
-            }
-
             this.backgroundFiles.push(file);
 
-            // Create preview URL
             const reader = new FileReader();
             reader.onload = (e) => {
                 if (!this.formData.background_images) {
                     this.formData.background_images = [];
                 }
+                // Add preview URL for display
                 this.formData.background_images.push(e.target.result);
             };
             reader.readAsDataURL(file);
         },
 
         removeBackgroundImage(index) {
-            if (this.formData.background_images) {
+            if (this.formData.background_images && this.formData.background_images[index]) {
+                const removedImage = this.formData.background_images[index];
+                
+                // Remove from display array
                 this.formData.background_images.splice(index, 1);
-            }
-            if (this.backgroundFiles[index]) {
-                this.backgroundFiles.splice(index, 1);
-            }
-        },
-
-        // Gradient methods
-        addGradient(preset = null) {
-            const newGradient =
-                preset || "linear-gradient(135deg, #ff7101, #102e4a)";
-            if (!this.formData.background_gradients) {
-                this.formData.background_gradients = [];
-            }
-            this.formData.background_gradients.push(newGradient);
-        },
-
-        removeGradient(index) {
-            if (
-                this.formData.background_gradients &&
-                this.formData.background_gradients.length > 1
-            ) {
-                this.formData.background_gradients.splice(index, 1);
+                
+                // If it's a newly uploaded file (data URL), also remove from backgroundFiles
+                if (removedImage.startsWith('data:')) {
+                    const fileIndex = this.backgroundFiles.findIndex((file, fileIdx) => {
+                        return fileIdx === index - this.getCurrentBackgroundImages().length;
+                    });
+                    if (fileIndex !== -1) {
+                        this.backgroundFiles.splice(fileIndex, 1);
+                    }
+                }
             }
         },
 
@@ -1974,11 +2154,6 @@ export default {
         },
 
         processLogoFile(file) {
-            if (file.size > 2 * 1024 * 1024) {
-                this.$emit("error", "Logo file size must be less than 2MB");
-                return;
-            }
-
             this.logoFile = file;
 
             const reader = new FileReader();
@@ -1993,7 +2168,7 @@ export default {
             if (!this.formData.cta_buttons) {
                 this.formData.cta_buttons = [];
             }
-
+            
             this.formData.cta_buttons.push({
                 text: "New Button",
                 url: "#",
@@ -2016,27 +2191,9 @@ export default {
         },
 
         removeButton(index) {
-            if (
-                this.formData.cta_buttons &&
-                this.formData.cta_buttons.length > 1
-            ) {
+            if (this.formData.cta_buttons && this.formData.cta_buttons.length > 1) {
                 this.formData.cta_buttons.splice(index, 1);
             }
-        },
-
-        getButtonStyles(button) {
-            return {
-                background: button.styles?.background || "#ff7101",
-                color: button.styles?.color || "#fff",
-                border: button.styles?.border || "2px solid #ff7101",
-                borderRadius: button.styles?.borderRadius || "6px",
-                padding: button.styles?.padding || "10px 28px",
-                fontWeight: button.styles?.fontWeight || "500",
-                cursor: "pointer",
-                textDecoration: "none",
-                display: "inline-block",
-                transition: "all 0.3s ease",
-            };
         },
 
         // Menu methods
@@ -2044,7 +2201,7 @@ export default {
             if (!this.formData.navigation.menu_items) {
                 this.formData.navigation.menu_items = [];
             }
-
+            
             this.formData.navigation.menu_items.push({
                 title: "Menu Item",
                 url: "#",
@@ -2075,9 +2232,10 @@ export default {
 
         removeSubMenuItem(parentIndex, subIndex) {
             if (this.formData.navigation.menu_items[parentIndex].sub_items) {
-                this.formData.navigation.menu_items[
-                    parentIndex
-                ].sub_items.splice(subIndex, 1);
+                this.formData.navigation.menu_items[parentIndex].sub_items.splice(
+                    subIndex,
+                    1
+                );
             }
         },
 
@@ -2103,7 +2261,6 @@ export default {
                 });
             }
 
-            // If no backgrounds, add a default
             if (backgrounds.length === 0) {
                 backgrounds.push({
                     type: "gradient",
@@ -2124,60 +2281,6 @@ export default {
             } else {
                 return { background: background.source };
             }
-        },
-
-        getPreviewSectionStyles() {
-            return {
-                minHeight: this.formData.section_styles.minHeight,
-                padding: this.formData.section_styles.padding,
-                display: this.formData.section_styles.display,
-                overflow: this.formData.section_styles.overflow,
-            };
-        },
-
-        getPreviewContentStyles() {
-            return {
-                position: "relative",
-                zIndex: "5",
-                width: "100%",
-                padding: "20px",
-                textAlign: "center",
-            };
-        },
-
-        getPreviewNavStyles() {
-            return {
-                background: this.formData.nav_styles.background,
-                color: this.formData.nav_styles.link_color,
-            };
-        },
-
-        getPreviewTitleStyles() {
-            return {
-                fontSize: this.formData.text_styles.title.fontSize,
-                fontWeight: this.formData.text_styles.title.fontWeight,
-                color: this.formData.text_styles.title.color,
-                marginBottom: this.formData.text_styles.title.marginBottom,
-            };
-        },
-
-        getPreviewSubtitleStyles() {
-            return {
-                fontSize: this.formData.text_styles.subtitle.fontSize,
-                fontWeight: this.formData.text_styles.subtitle.fontWeight,
-                color: this.formData.text_styles.subtitle.color,
-                marginBottom: this.formData.text_styles.subtitle.marginBottom,
-            };
-        },
-
-        getPreviewTaglineStyles() {
-            return {
-                fontSize: this.formData.text_styles.tagline.fontSize,
-                fontWeight: this.formData.text_styles.tagline.fontWeight,
-                color: this.formData.text_styles.tagline.color,
-                lineHeight: this.formData.text_styles.tagline.lineHeight,
-                marginBottom: this.formData.text_styles.tagline.marginBottom,
-            };
         },
 
         startPreviewSlider() {
@@ -2201,18 +2304,9 @@ export default {
                 this.previewInterval = null;
             }
         },
-
-        togglePreviewSlider() {
-            if (this.previewSliderActive) {
-                this.stopPreviewSlider();
-            } else {
-                this.startPreviewSlider();
-            }
-        },
     },
 };
 </script>
-
 <style scoped>
 .hero-editor {
     background: #fff;

@@ -351,7 +351,6 @@
 <script>
 import axios from "axios";
 import HeroSectionEditor from "./HeroSectionEditor.vue";
-
 export default {
     name: "HeroSectionManagement",
     components: {
@@ -379,6 +378,7 @@ export default {
         this.fetchHeroSections();
     },
     methods: {
+        // FIXED: Fetch hero sections with better reactivity
         async fetchHeroSections() {
             this.loading = true;
             try {
@@ -390,11 +390,8 @@ export default {
                     // Use nextTick to ensure DOM updates before setting new data
                     await this.$nextTick();
 
-                    // Set new data with timestamp to force reactivity
-                    this.heroSections = response.data.data.map((section) => ({
-                        ...section,
-                        _reactivityKey: Date.now() + Math.random(),
-                    }));
+                    // Set new data
+                    this.heroSections = response.data.data;
                 } else {
                     throw new Error(
                         response.data.message || "Failed to fetch hero sections"
@@ -413,6 +410,7 @@ export default {
             }
         },
 
+        // FIXED: Toast system
         showToast(message, type = "success", title = "") {
             const toast = {
                 id: ++this.toastCounter,
@@ -442,6 +440,7 @@ export default {
             }
         },
 
+        // FIXED: Toggle hero section active status
         async toggleHeroSectionActive(heroSection) {
             if (this.toggleLoading === heroSection.id) return;
 
@@ -458,7 +457,7 @@ export default {
                         "success"
                     );
 
-                    // Force reactivity by recreating the array
+                    // Update the local data properly
                     const updatedSection = response.data.data;
                     const newSections = [...this.heroSections];
                     const index = newSections.findIndex(
@@ -498,6 +497,7 @@ export default {
             }
         },
 
+        // FIXED: Delete hero section
         async deleteHeroSection(id) {
             const section = this.heroSections.find((s) => s.id === id);
             const confirmMessage =
@@ -521,7 +521,7 @@ export default {
                         "Hero section deleted successfully",
                         "success"
                     );
-                    // Force reactivity update
+                    // Remove from local array
                     this.heroSections = this.heroSections.filter(
                         (s) => s.id !== id
                     );
@@ -542,8 +542,146 @@ export default {
             }
         },
 
+        // FIXED: Start new hero section
         startNewHeroSection() {
-            this.currentHeroSection = {
+            this.currentHeroSection = this.getDefaultHeroSection();
+            this.isEditing = false;
+            this.showEditorModal = true;
+        },
+
+        // FIXED: Edit hero section with proper deep cloning
+        editHeroSection(heroSection) {
+            this.currentHeroSection = this.deepClone(heroSection);
+            this.isEditing = true;
+            this.showEditorModal = true;
+        },
+
+        // FIXED: Duplicate hero section
+        async duplicateHeroSection(heroSection) {
+            if (this.loading) return;
+
+            try {
+                this.loading = true;
+
+                const response = await axios.post(
+                    `/admin/hero-sections/${heroSection.id}/duplicate`
+                );
+
+                if (response.data.success) {
+                    this.showToast(
+                        "Hero section duplicated successfully",
+                        "success"
+                    );
+
+                    const newSection = response.data.data;
+
+                    // Check if section already exists to prevent duplicates
+                    const existingIndex = this.heroSections.findIndex(
+                        (s) => s.id === newSection.id
+                    );
+
+                    if (existingIndex === -1) {
+                        // Add new section at the beginning
+                        this.heroSections = [newSection, ...this.heroSections];
+                    }
+                } else {
+                    throw new Error(
+                        response.data.message ||
+                            "Failed to duplicate hero section"
+                    );
+                }
+            } catch (error) {
+                console.error("Error duplicating hero section:", error);
+                this.showToast(
+                    error.response?.data?.message ||
+                        "Failed to duplicate hero section",
+                    "error"
+                );
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // FIXED: Save hero section with proper state management
+        async saveHeroSection(formData) {
+            if (this.loading) return;
+
+            try {
+                this.loading = true;
+                let response;
+
+                if (this.isEditing) {
+                    response = await axios.post(
+                        `/admin/hero-sections/${this.currentHeroSection.id}`,
+                        formData,
+                        {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                        }
+                    );
+                } else {
+                    response = await axios.post(
+                        "/admin/hero-sections",
+                        formData,
+                        {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                        }
+                    );
+                }
+
+                if (response.data.success) {
+                    const actionText = this.isEditing ? "updated" : "created";
+                    this.showToast(
+                        `Hero section ${actionText} successfully`,
+                        "success"
+                    );
+
+                    // CRITICAL: Close editor FIRST to prevent duplication
+                    this.closeEditor();
+
+                    // THEN update data after a small delay to ensure editor is closed
+                    setTimeout(async () => {
+                        await this.fetchHeroSections();
+                    }, 100);
+                } else {
+                    throw new Error(
+                        response.data.message || "Operation failed"
+                    );
+                }
+            } catch (error) {
+                console.error("Save error:", error);
+                let errorMessage = `Failed to ${
+                    this.isEditing ? "update" : "create"
+                } hero section`;
+
+                if (error.response?.data?.message) {
+                    errorMessage += `: ${error.response.data.message}`;
+                } else if (error.response?.data?.errors) {
+                    const errors = Object.values(
+                        error.response.data.errors
+                    ).flat();
+                    errorMessage += `: ${errors.join(", ")}`;
+                }
+
+                this.showToast(errorMessage, "error");
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // FIXED: Close editor properly
+        closeEditor() {
+            this.showEditorModal = false;
+            this.currentHeroSection = null;
+            this.isEditing = false;
+        },
+
+        // Helper method: Get default hero section structure
+        getDefaultHeroSection() {
+            return {
                 section_name: "",
                 title: "Welcome To",
                 title_highlight: "Your Brand",
@@ -664,10 +802,9 @@ export default {
                 meta_tags: [],
                 is_active: false,
             };
-            this.isEditing = false;
-            this.showEditorModal = true;
         },
 
+        // Helper method: Deep clone object
         deepClone(obj) {
             if (obj === null || typeof obj !== "object") return obj;
             if (obj instanceof Date) return new Date(obj.getTime());
@@ -684,180 +821,7 @@ export default {
             }
         },
 
-        async duplicateHeroSection(heroSection) {
-            if (this.loading) return;
-
-            try {
-                this.loading = true;
-
-                const response = await axios.post(
-                    `/admin/hero-sections/${heroSection.id}/duplicate`
-                );
-
-                if (response.data.success) {
-                    this.showToast(
-                        "Hero section duplicated successfully",
-                        "success"
-                    );
-
-                    const newSection = response.data.data;
-
-                    // Check if section already exists (prevent duplicates)
-                    const existingIndex = this.heroSections.findIndex(
-                        (s) => s.id === newSection.id
-                    );
-
-                    if (existingIndex === -1) {
-                        // Add new section only if it doesn't exist
-                        this.heroSections = [newSection, ...this.heroSections];
-                    } else {
-                        // If it exists, just update it
-                        const newSections = [...this.heroSections];
-                        newSections[existingIndex] = { ...newSection };
-                        this.heroSections = newSections;
-                    }
-                } else {
-                    throw new Error(
-                        response.data.message ||
-                            "Failed to duplicate hero section"
-                    );
-                }
-            } catch (error) {
-                console.error("Error duplicating hero section:", error);
-                this.showToast(
-                    error.response?.data?.message ||
-                        "Failed to duplicate hero section",
-                    "error"
-                );
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async saveHeroSection(formData) {
-            if (this.loading) return;
-
-            try {
-                this.loading = true;
-                let response;
-
-                if (this.isEditing) {
-                    response = await axios.post(
-                        `/admin/hero-sections/${this.currentHeroSection.id}`,
-                        formData,
-                        {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
-                        }
-                    );
-                } else {
-                    response = await axios.post(
-                        "/admin/hero-sections",
-                        formData,
-                        {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
-                        }
-                    );
-                }
-
-                if (response.data.success) {
-                    const actionText = this.isEditing ? "updated" : "created";
-                    this.showToast(
-                        `Hero section ${actionText} successfully`,
-                        "success"
-                    );
-
-                    // CRITICAL: Close editor FIRST to prevent duplication
-                    this.closeEditor();
-
-                    // THEN update the data with proper reactivity
-                    if (this.isEditing) {
-                        // For updates: replace the existing item
-                        const updatedSection = response.data.data;
-                        const newSections = [...this.heroSections];
-                        const index = newSections.findIndex(
-                            (s) => s.id === updatedSection.id
-                        );
-
-                        if (index !== -1) {
-                            // Replace with updated data
-                            newSections[index] = { ...updatedSection };
-
-                            // Handle active status: if this section became active, deactivate others
-                            if (updatedSection.is_active) {
-                                newSections.forEach((section, idx) => {
-                                    if (idx !== index) {
-                                        section.is_active = false;
-                                    }
-                                });
-                            }
-
-                            // Trigger reactivity with new array reference
-                            this.heroSections = newSections;
-                        }
-                    } else {
-                        // For new sections: add to beginning
-                        const newSection = response.data.data;
-                        const newSections = [newSection, ...this.heroSections];
-
-                        // Handle active status: if new section is active, deactivate others
-                        if (newSection.is_active) {
-                            newSections.forEach((section, idx) => {
-                                if (idx !== 0) {
-                                    section.is_active = false;
-                                }
-                            });
-                        }
-
-                        this.heroSections = newSections;
-                    }
-                } else {
-                    throw new Error(
-                        response.data.message || "Operation failed"
-                    );
-                }
-            } catch (error) {
-                console.error("Save error:", error);
-                let errorMessage = `Failed to ${
-                    this.isEditing ? "update" : "create"
-                } hero section`;
-
-                if (error.response?.data?.message) {
-                    errorMessage += `: ${error.response.data.message}`;
-                } else if (error.response?.data?.errors) {
-                    const errors = Object.values(
-                        error.response.data.errors
-                    ).flat();
-                    errorMessage += `: ${errors.join(", ")}`;
-                }
-
-                this.showToast(errorMessage, "error");
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        closeEditor() {
-            this.showEditorModal = false;
-            this.currentHeroSection = null;
-            this.isEditing = false;
-            // Force Vue to clean up any refs or watchers
-            this.$nextTick(() => {
-                // Additional cleanup if needed
-            });
-        },
-
-        // 3. FIXED: editHeroSection method with deep cloning
-        editHeroSection(heroSection) {
-            // Create a proper deep copy to avoid reference issues
-            this.currentHeroSection = this.deepClone(heroSection);
-            this.isEditing = true;
-            this.showEditorModal = true;
-        },
-
+        // Helper method: Get hero preview style
         getHeroPreviewStyle(heroSection) {
             let backgroundStyle = {};
 

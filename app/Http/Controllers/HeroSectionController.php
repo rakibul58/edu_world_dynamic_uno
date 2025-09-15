@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 class HeroSectionController extends Controller
 {
@@ -285,9 +286,21 @@ class HeroSectionController extends Controller
         // Handle background images
         $backgroundImages = [];
 
-        // Keep existing background images if updating and no new files
+        // Get current background images from request if updating
+        $currentBackgroundImages = [];
+        if ($request->has('current_background_images')) {
+            $currentValue = $request->input('current_background_images');
+            if (is_string($currentValue)) {
+                $decoded = json_decode($currentValue, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $currentBackgroundImages = $decoded;
+                }
+            }
+        }
+
+        // If updating and no new files, use current images
         if ($heroSection && !$request->hasFile('background_images')) {
-            $backgroundImages = $heroSection->background_images ?? [];
+            $backgroundImages = $currentBackgroundImages;
         }
 
         // Handle new background image uploads
@@ -307,8 +320,16 @@ class HeroSectionController extends Controller
             foreach ($files as $file) {
                 if ($file && $file->isValid()) {
                     $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('uploads/slides', $filename, 'public');
-                    $backgroundImages[] = '/storage/' . $path;
+                    
+                    // Create directory if it doesn't exist
+                    $uploadPath = public_path('uploads/slides');
+                    if (!File::exists($uploadPath)) {
+                        File::makeDirectory($uploadPath, 0755, true);
+                    }
+                    
+                    // Move file to public/uploads/slides
+                    $file->move($uploadPath, $filename);
+                    $backgroundImages[] = url('uploads/slides/' . $filename);
                 }
             }
         }
@@ -330,14 +351,39 @@ class HeroSectionController extends Controller
             $logoFile = $request->file('logo_image');
             if ($logoFile->isValid()) {
                 $filename = time() . '_logo_' . uniqid() . '.' . $logoFile->getClientOriginalExtension();
-                $path = $logoFile->storeAs('uploads/image', $filename, 'public');
+                
+                // Create directory if it doesn't exist
+                $uploadPath = public_path('uploads/image');
+                if (!File::exists($uploadPath)) {
+                    File::makeDirectory($uploadPath, 0755, true);
+                }
+                
+                // Move file to public/uploads/image
+                $logoFile->move($uploadPath, $filename);
 
-                // Update navigation logo path
+                // Update navigation logo with complete structure
                 $navigation = $validated['navigation'] ?? [];
                 if (!isset($navigation['logo'])) {
-                    $navigation['logo'] = [];
+                    $navigation['logo'] = [
+                        'type' => 'image',
+                        'text' => 'Logo',
+                        'url' => '/',
+                        'alt' => 'Logo'
+                    ];
                 }
-                $navigation['logo']['image_path'] = '/storage/' . $path;
+                
+                // Update logo to image type and set path
+                $navigation['logo']['type'] = 'image';
+                $navigation['logo']['image_path'] = 'uploads/image/' . $filename;
+                
+                // Ensure other logo fields exist
+                if (!isset($navigation['logo']['alt'])) {
+                    $navigation['logo']['alt'] = 'Logo';
+                }
+                if (!isset($navigation['logo']['url'])) {
+                    $navigation['logo']['url'] = '/';
+                }
+                
                 $validated['navigation'] = $navigation;
             }
         }
@@ -346,22 +392,40 @@ class HeroSectionController extends Controller
     }
 
     /**
-     * Delete a file from storage
+     * Delete a file from public directory
      */
     private function deleteFile($filePath): void
     {
-        // Add type checking to prevent the strpos error
+        // Add type checking to prevent errors
         if (!$filePath || !is_string($filePath)) {
             return;
         }
 
-        if (strpos($filePath, '/storage/') === 0) {
-            $relativePath = str_replace('/storage/', '', $filePath);
-            Storage::disk('public')->delete($relativePath);
+        // Handle different path formats
+        $publicPath = '';
+        
+        // If it's a full URL, extract the path
+        if (strpos($filePath, url('/')) === 0) {
+            $publicPath = str_replace(url('/'), '', $filePath);
+        } 
+        // If it starts with uploads/, use it directly
+        elseif (strpos($filePath, 'uploads/') === 0) {
+            $publicPath = $filePath;
+        }
+        // If it starts with /uploads/, remove the leading slash
+        elseif (strpos($filePath, '/uploads/') === 0) {
+            $publicPath = ltrim($filePath, '/');
+        }
+
+        if ($publicPath) {
+            $fullPath = public_path($publicPath);
+            if (File::exists($fullPath)) {
+                File::delete($fullPath);
+                Log::info('Deleted file: ' . $fullPath);
+            }
         }
     }
 
-    
     /**
      * Delete associated files for a hero section
      */
@@ -369,15 +433,16 @@ class HeroSectionController extends Controller
     {
         // Delete background images
         if ($heroSection->background_images) {
-            // Handle the array properly since background_images is cast as array
             $backgroundImages = $heroSection->background_images;
             if (is_array($backgroundImages)) {
                 foreach ($backgroundImages as $image) {
-                    // Handle both string paths and image objects
-                    if (is_string($image)) {
-                        $this->deleteFile($image);
-                    } elseif (is_array($image) && isset($image['url'])) {
+                    // Handle new format with url property
+                    if (is_array($image) && isset($image['url'])) {
                         $this->deleteFile($image['url']);
+                    }
+                    // Handle old format with direct URL strings (backward compatibility)
+                    elseif (is_string($image)) {
+                        $this->deleteFile($image);
                     }
                 }
             }
@@ -389,6 +454,7 @@ class HeroSectionController extends Controller
             $this->deleteFile($navigation['logo']['image_path']);
         }
     }
+
     /**
      * Validate hero section data
      */
@@ -415,7 +481,8 @@ class HeroSectionController extends Controller
             'navigation',
             'nav_styles',
             'advanced_settings',
-            'meta_tags'
+            'meta_tags',
+            'current_background_images'
         ];
 
         foreach ($jsonFields as $field) {
@@ -451,9 +518,10 @@ class HeroSectionController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_tags' => 'nullable|array',
+            'current_background_images' => 'nullable|array',
             // File uploads
-            'background_images.*' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'logo_image' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            'background_images.*' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp',
+            'logo_image' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp'
         ];
 
         return $request->validate($rules);
