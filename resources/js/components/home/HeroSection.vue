@@ -88,6 +88,8 @@
                                 :href="subItem.url || '#'"
                                 :target="subItem.target || '_self'"
                                 :style="getDropdownItemStyles()"
+                                @mouseover="hoverDropdownItem($event, true)"
+                                @mouseleave="hoverDropdownItem($event, false)"
                                 >{{ subItem.text || subItem }}</a
                             >
                         </div>
@@ -305,6 +307,8 @@ export default {
                     dropdown_background: "#fff",
                     scrolled_background: "rgba(0, 30, 60, 0.95)",
                     dropdown_border_color: "#ff7101",
+                    dropdown_text_color: "#111",
+                    dropdown_hover_color: "#ff7101",
                 },
                 overlay_styles: {
                     background:
@@ -433,6 +437,13 @@ export default {
         // Style getter methods
         getSectionStyles() {
             const styles = this.heroData?.section_styles || {};
+
+            // Apply dynamic zoom duration if set
+            if (this.heroData?.advanced_settings?.zoom_duration) {
+                styles["--zoom-duration"] =
+                    this.heroData.advanced_settings.zoom_duration;
+            }
+
             // Ensure reasonable default height
             if (!styles.minHeight && !styles.height) {
                 styles.height = "60vh";
@@ -441,7 +452,15 @@ export default {
         },
 
         getOverlayStyles() {
-            return this.heroData?.overlay_styles || {};
+            const overlayStyles = this.heroData?.overlay_styles || {};
+            const styles = { ...overlayStyles };
+
+            // Apply opacity if set
+            if (overlayStyles.opacity) {
+                styles.opacity = overlayStyles.opacity;
+            }
+
+            return styles;
         },
 
         getNavStyles() {
@@ -450,9 +469,16 @@ export default {
 
             if (navStyles) {
                 if (!this.isScrolled) {
-                    styles.background = navStyles.background;
+                    styles.background = navStyles.background || "transparent";
                 } else {
-                    styles.background = navStyles.scrolled_background;
+                    styles.background =
+                        navStyles.scrolled_background ||
+                        "rgba(0, 30, 60, 0.95)";
+                }
+
+                // Apply transition duration if set
+                if (this.heroData?.advanced_settings?.transition_duration) {
+                    styles.transition = `background ${this.heroData.advanced_settings.transition_duration} ease`;
                 }
             }
 
@@ -478,6 +504,11 @@ export default {
                 styles.color = navStyles.link_color;
             }
 
+            // Add transition for smooth hover effects
+            if (this.heroData?.advanced_settings?.transition_duration) {
+                styles.transition = `color ${this.heroData.advanced_settings.transition_duration} ease`;
+            }
+
             return styles;
         },
 
@@ -497,23 +528,38 @@ export default {
 
         getDropdownItemStyles() {
             const styles = {};
-            // Default styles for dropdown items
-            styles.color = "#111";
+            const navStyles = this.heroData?.nav_styles;
+
+            // Use dynamic dropdown text color or fallback
+            styles.color = navStyles?.dropdown_text_color || "#111";
+
+            // Add transition for smooth hover effects
+            if (this.heroData?.advanced_settings?.transition_duration) {
+                styles.transition = `color ${this.heroData.advanced_settings.transition_duration} ease`;
+            }
+
             return styles;
         },
 
         getLogoTextStyles() {
+            const navStyles = this.heroData?.nav_styles;
             return {
-                color: this.heroData?.nav_styles?.link_color || "#fff",
+                color: navStyles?.link_color || "#fff",
                 fontWeight: "bold",
                 fontSize: "1.2rem",
             };
         },
 
         getMenuToggleStyles() {
-            return {
-                color: this.heroData?.nav_styles?.link_color || "#ff7101",
-            };
+            const navStyles = this.heroData?.nav_styles;
+            const styles = {};
+
+            // Use link_color for menu toggle or fallback
+            if (navStyles?.link_color) {
+                styles["--toggle-color"] = navStyles.link_color;
+            }
+
+            return styles;
         },
 
         getContentStyles() {
@@ -561,13 +607,21 @@ export default {
         },
 
         getButtonStyles(button) {
-            return button.styles || {};
+            const styles = { ...button.styles } || {};
+
+            // Add transition for smooth hover effects
+            if (this.heroData?.advanced_settings?.transition_duration) {
+                styles.transition = `all ${this.heroData.advanced_settings.transition_duration} ease`;
+            }
+
+            return styles;
         },
 
         hoverButton(event, button, isHover) {
-            if (button.hover_styles && isHover) {
+            if (isHover && button.hover_styles) {
                 Object.assign(event.target.style, button.hover_styles);
             } else if (button.styles) {
+                // Reset to original styles
                 Object.assign(event.target.style, button.styles);
             }
         },
@@ -582,6 +636,19 @@ export default {
                 }
             }
         },
+
+        hoverDropdownItem(event, isHover) {
+            const navStyles = this.heroData?.nav_styles;
+            if (navStyles) {
+                if (isHover && navStyles.dropdown_hover_color) {
+                    event.target.style.color = navStyles.dropdown_hover_color;
+                } else if (navStyles.dropdown_text_color) {
+                    event.target.style.color = navStyles.dropdown_text_color;
+                } else {
+                    event.target.style.color = "#111"; // fallback
+                }
+            }
+        },
     },
 
     watch: {
@@ -593,6 +660,7 @@ export default {
                         clearInterval(this.sliderInterval);
                     }
                     this.startSlider();
+                    this.setupDropdownStyles(); // Add this line
                 });
             },
             deep: true,
@@ -631,7 +699,7 @@ export default {
 }
 
 .hero-background.zoom-effect {
-    animation: zoomOut 8s ease-out infinite;
+    animation: zoomOut var(--zoom-duration, 8s) ease-out infinite;
 }
 
 /* Fallback gradients for when no images are available */
@@ -720,12 +788,6 @@ export default {
     transition: color 0.2s ease-in-out;
 }
 
-/* Fixed hover color for nav links */
-.nav-links a:hover,
-.dropdown > a:hover {
-    color: #d35b00 !important;
-}
-
 /* dropdown (desktop hover) */
 .dropdown {
     position: relative;
@@ -750,10 +812,6 @@ export default {
     transition: color 0.2s ease-in-out;
 }
 
-.dropdown-content a:hover {
-    color: #ff7101 !important;
-}
-
 .dropdown:hover .dropdown-content {
     display: block;
 }
@@ -771,7 +829,7 @@ export default {
     display: block;
     height: 3px;
     width: 26px;
-    background: #ff7101;
+    background: var(--toggle-color, #ff7101);
     border-radius: 3px;
     transition: all 0.3s ease;
 }
@@ -827,6 +885,7 @@ export default {
     cursor: pointer;
 }
 
+/* Default fallback styles - will be overridden by dynamic styles */
 .btn-primary {
     background: #20bf6b;
     border-color: #20bf6b;
@@ -887,12 +946,10 @@ export default {
         box-shadow: none;
     }
     .dropdown-content a {
-        color: #fff !important;
+        color: #fff; /* Will be overridden by JavaScript */
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .dropdown-content a:hover {
-        color: #ff7101 !important;
-    }
+    /* Mobile dropdown hover will be handled by JavaScript */
 
     .hero-content {
         padding: 80px 20px 60px;
